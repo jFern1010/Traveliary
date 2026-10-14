@@ -12,6 +12,7 @@ import { BrandColor, Spacing } from '@/constants/theme';
 import type { CaptureLocation } from '@/features/capture/capture-location';
 import { clearDraft, getDraft } from '@/features/capture/draft';
 import { formatCoordinates, formatPlaceLabel } from '@/features/capture/place-name';
+import { usePostPhoto } from '@/features/photos/hooks';
 import { usePromise, type PromiseState } from '@/hooks/use-promise';
 
 export default function PreviewScreen() {
@@ -20,6 +21,7 @@ export default function PreviewScreen() {
   const location = usePromise(draft?.location ?? null);
   const photo = usePromise(draft?.photo ?? null);
   const insets = useSafeAreaInsets();
+  const postPhoto = usePostPhoto();
 
   if (!draft) {
     return (
@@ -32,7 +34,8 @@ export default function PreviewScreen() {
     );
   }
 
-  const canPost = location.status === 'fulfilled' && photo.status === 'fulfilled';
+  const posting = postPhoto.isPending;
+  const canPost = location.status === 'fulfilled' && photo.status === 'fulfilled' && !posting;
   const processing = location.status === 'pending' || photo.status === 'pending';
 
   function retake() {
@@ -41,13 +44,28 @@ export default function PreviewScreen() {
   }
 
   function post() {
-    if (location.status !== 'fulfilled' || photo.status !== 'fulfilled') return;
-    const { full, thumb } = photo.value;
-    // M1 stub: uploading arrives in M2.
-    Alert.alert(
-      'Ready to post',
-      `Uploading arrives in M2.\n\nPhoto ${full.width}×${full.height}, thumbnail ${thumb.width}×${thumb.height}.`,
-      [{ text: 'OK', onPress: retake }],
+    if (!draft || location.status !== 'fulfilled' || photo.status !== 'fulfilled') return;
+    const { latitude, longitude, accuracy, place } = location.value;
+    postPhoto.mutate(
+      {
+        // Same ID on every retry of this draft, so the server never creates a duplicate.
+        photoId: draft.id,
+        takenAt: draft.takenAt,
+        latitude,
+        longitude,
+        accuracy,
+        place,
+        files: photo.value,
+      },
+      {
+        onSuccess: () => {
+          clearDraft();
+          router.navigate('/mine');
+        },
+        onError: (error) => {
+          Alert.alert('Couldn’t post your photo', `${error.message}\n\nCheck your connection and try again.`);
+        },
+      },
     );
   }
 
@@ -86,12 +104,12 @@ export default function PreviewScreen() {
           paddingTop: Spacing.two,
           paddingBottom: insets.bottom + Spacing.two,
         }}>
-        <PrimaryButton label="Retake" variant="secondary" onPress={retake} />
+        <PrimaryButton label="Retake" variant="secondary" onPress={retake} disabled={posting} />
         <PrimaryButton
-          label="Post publicly"
+          label={posting ? 'Posting…' : 'Post publicly'}
           onPress={post}
           disabled={!canPost}
-          loading={processing}
+          loading={processing || posting}
         />
       </View>
     </ThemedView>

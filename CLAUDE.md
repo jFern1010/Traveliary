@@ -41,7 +41,21 @@ npm run typecheck      # tsc --noEmit
 npm run lint           # expo lint
 npx expo-doctor        # dependency/config health
 npx eas-cli@latest init # one time: links the project to Expo (adds projectId, needed for push tokens)
+
+# Supabase (hosted project; no Docker needed)
+npx supabase@latest login                          # one time, opens the browser
+npx supabase@latest link --project-ref <ref>       # one time, asks for the database password
+npx supabase@latest db push                        # apply new files in supabase/migrations
 ```
+
+## Backend setup
+- `.env.local` (gitignored) holds `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY`. See `.env.example`.
+- Dashboard → Authentication → Sign In / Providers → **Allow anonymous sign-ins** must be on.
+- Clients never touch `photos` directly:
+  - Reads go through the `photos_public` view.
+  - Writes go through the `create_photo` / `delete_my_photo` RPCs.
+  - Storage files live at `photos/<uid>/<photoId>.jpg` and `_thumb.jpg`.
+- Photo IDs are generated on the phone (`draft.id`) so retrying a post never duplicates it.
 Before a milestone is called done, run `npm run typecheck && npm run lint && npm test`.
 
 ## Known quirks

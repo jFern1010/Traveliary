@@ -1,3 +1,5 @@
+import { uuidv4 } from '@/lib/uuid';
+
 import { getCaptureLocation, type CaptureLocation } from './capture-location';
 import { processPhoto, type ProcessedPhoto } from './process-image';
 
@@ -7,6 +9,7 @@ import { processPhoto, type ProcessedPhoto } from './process-image';
  * belongs to the moment of capture; the preview screen awaits both.
  */
 export type CaptureDraft = {
+  /** Becomes the photo ID on the server; reused on retry so a post is never duplicated. */
   id: string;
   /** Device time of the shutter press (ISO 8601). */
   takenAt: string;
@@ -26,7 +29,7 @@ export function startDraft(picture: { uri: string; width: number; height: number
   photo.catch(() => {});
 
   current = {
-    id: `${Date.now()}`,
+    id: uuidv4(),
     takenAt: new Date().toISOString(),
     previewUri: picture.uri,
     previewAspectRatio: picture.width / picture.height,
