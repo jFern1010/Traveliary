@@ -7,9 +7,19 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CameraIconButton, ShutterButton } from '@/components/camera-control';
 import { ThemedText } from '@/components/themed-text';
 import { BottomTabInset, Spacing } from '@/constants/theme';
+import { getCaptureLocation, type CaptureLocation } from '@/features/capture/capture-location';
 import { startDraft } from '@/features/capture/draft';
 import { PermissionGate } from '@/features/capture/permission-gate';
+import { formatCoordinates, formatPlaceLabel } from '@/features/capture/place-name';
 import { useCapturePermissions } from '@/features/capture/use-capture-permissions';
+import { usePromise, type PromiseState } from '@/hooks/use-promise';
+
+function describeLocation(state: PromiseState<CaptureLocation>): string {
+  if (state.status === 'pending') return 'Finding your place…';
+  if (state.status === 'rejected') return 'Location unavailable';
+  const { place, latitude, longitude } = state.value;
+  return place ? formatPlaceLabel(place) : formatCoordinates(latitude, longitude);
+}
 
 export default function CaptureScreen() {
   const permissions = useCapturePermissions();
@@ -39,6 +49,11 @@ function LiveCamera() {
   const [ready, setReady] = useState(false);
   const [capturing, setCapturing] = useState(false);
   const insets = useSafeAreaInsets();
+  // A quick look-up so the user sees where they are before shooting. Refreshes each time the tab
+  // is opened (this component remounts). The photo itself still gets a fresh fix at shutter press.
+  const [currentLocation] = useState(getCaptureLocation);
+  const located = usePromise(currentLocation);
+  const placeLabel = describeLocation(located);
 
   async function takePhoto() {
     if (!cameraRef.current || capturing) return;
@@ -79,7 +94,7 @@ function LiveCamera() {
             overflow: 'hidden',
             backgroundColor: 'rgba(0, 0, 0, 0.4)',
           }}>
-          📍 Tagged with where you are
+          📍 {placeLabel}
         </ThemedText>
       </View>
 
