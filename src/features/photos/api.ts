@@ -5,7 +5,7 @@ import type { ProcessedPhoto } from '@/features/capture/process-image';
 import { PHOTO_BUCKET, supabase } from '@/lib/supabase';
 import { buildCreatePhotoArgs, photoStoragePaths, type CreatePhotoInput } from './create-photo-args';
 
-export type MyPhoto = {
+export type Photo = {
   id: string;
   placeId: string;
   placeName: string;
@@ -15,8 +15,13 @@ export type MyPhoto = {
   width: number;
   height: number;
   takenAt: string;
+  createdAt: string;
   status: 'visible' | 'hidden';
+  isMine: boolean;
 };
+
+/** One page of a place gallery; pass `nextCursor` back to load older photos. */
+export type PhotoPage = { photos: Photo[]; nextCursor: string | null };
 
 type PhotoPublicRow = {
   id: string;
@@ -37,6 +42,23 @@ export type PostedPhoto = { photoId: string; placeId: string; placeName: string 
 
 function publicUrl(path: string): string {
   return supabase.storage.from(PHOTO_BUCKET).getPublicUrl(path).data.publicUrl;
+}
+
+function toPhoto(row: PhotoPublicRow): Photo {
+  return {
+    id: row.id,
+    placeId: row.place_id,
+    placeName: row.place_name,
+    placeCountry: row.place_country,
+    thumbUrl: publicUrl(row.thumb_path),
+    fullUrl: publicUrl(row.storage_path),
+    width: row.width,
+    height: row.height,
+    takenAt: row.taken_at,
+    createdAt: row.created_at,
+    status: row.status,
+    isMine: row.is_mine,
+  };
 }
 
 async function upload(path: string, localUri: string) {
@@ -72,7 +94,7 @@ export async function postPhoto(
   return { photoId: result.photo_id, placeId: result.place_id, placeName: result.place_name };
 }
 
-export async function listMyPhotos(): Promise<MyPhoto[]> {
+export async function listMyPhotos(): Promise<Photo[]> {
   await ensureUserId();
   const { data, error } = await supabase
     .from('photos_public')
@@ -82,19 +104,41 @@ export async function listMyPhotos(): Promise<MyPhoto[]> {
     .limit(200)
     .returns<PhotoPublicRow[]>();
   if (error) throw new Error(error.message);
+  return data.map(toPhoto);
+}
 
-  return data.map((row) => ({
-    id: row.id,
-    placeId: row.place_id,
-    placeName: row.place_name,
-    placeCountry: row.place_country,
-    thumbUrl: publicUrl(row.thumb_path),
-    fullUrl: publicUrl(row.storage_path),
-    width: row.width,
-    height: row.height,
-    takenAt: row.taken_at,
-    status: row.status,
-  }));
+const PAGE_SIZE = 30;
+
+export async function listPlacePhotos(placeId: string, cursor: string | null): Promise<PhotoPage> {
+  await ensureUserId();
+  let query = supabase
+    .from('photos_public')
+    .select('*')
+    .eq('place_id', placeId)
+    .eq('status', 'visible')
+    .order('created_at', { ascending: false })
+    .limit(PAGE_SIZE);
+  if (cursor) query = query.lt('created_at', cursor);
+
+  const { data, error } = await query.returns<PhotoPublicRow[]>();
+  if (error) throw new Error(error.message);
+  const photos = data.map(toPhoto);
+  return {
+    photos,
+    nextCursor: photos.length === PAGE_SIZE ? photos[photos.length - 1].createdAt : null,
+  };
+}
+
+export async function getPhoto(photoId: string): Promise<Photo> {
+  await ensureUserId();
+  const { data, error } = await supabase
+    .from('photos_public')
+    .select('*')
+    .eq('id', photoId)
+    .maybeSingle<PhotoPublicRow>();
+  if (error) throw new Error(error.message);
+  if (!data) throw new Error('This photo is no longer available.');
+  return toPhoto(data);
 }
 
 export async function deleteMyPhoto(photoId: string): Promise<void> {

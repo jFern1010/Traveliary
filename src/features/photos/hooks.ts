@@ -1,10 +1,13 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { isBackendConfigured } from '@/lib/env';
-import { deleteMyPhoto, listMyPhotos, postPhoto } from './api';
+import { deleteMyPhoto, getPhoto, listMyPhotos, listPlacePhotos, postPhoto } from './api';
 
 export const photoKeys = {
+  all: ['photos'] as const,
   mine: ['photos', 'mine'] as const,
+  place: (placeId: string) => ['photos', 'place', placeId] as const,
+  detail: (photoId: string) => ['photos', 'detail', photoId] as const,
 };
 
 export function useMyPhotos() {
@@ -15,18 +18,40 @@ export function useMyPhotos() {
   });
 }
 
-export function usePostPhoto() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: postPhoto,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: photoKeys.mine }),
+export function usePlacePhotos(placeId: string) {
+  return useInfiniteQuery({
+    queryKey: photoKeys.place(placeId),
+    queryFn: ({ pageParam }) => listPlacePhotos(placeId, pageParam),
+    initialPageParam: null as string | null,
+    getNextPageParam: (lastPage) => lastPage.nextCursor,
+    enabled: isBackendConfigured,
   });
 }
 
-export function useDeleteMyPhoto() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: deleteMyPhoto,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: photoKeys.mine }),
+export function usePhoto(photoId: string) {
+  return useQuery({
+    queryKey: photoKeys.detail(photoId),
+    queryFn: () => getPhoto(photoId),
+    enabled: isBackendConfigured,
   });
+}
+
+/** Posting or deleting changes galleries, counts and map pins, so refresh all of them. */
+function useInvalidateAfterChange() {
+  const queryClient = useQueryClient();
+  return () =>
+    Promise.all([
+      queryClient.invalidateQueries({ queryKey: photoKeys.all }),
+      queryClient.invalidateQueries({ queryKey: ['places'] }),
+    ]);
+}
+
+export function usePostPhoto() {
+  const invalidate = useInvalidateAfterChange();
+  return useMutation({ mutationFn: postPhoto, onSuccess: invalidate });
+}
+
+export function useDeleteMyPhoto() {
+  const invalidate = useInvalidateAfterChange();
+  return useMutation({ mutationFn: deleteMyPhoto, onSuccess: invalidate });
 }
