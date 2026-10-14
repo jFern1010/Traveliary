@@ -11,6 +11,10 @@ export default function RootLayout() {
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="capture/preview"
+          options={{ title: 'Post this photo?', headerBackTitle: 'Camera' }}
+        />
         <Stack.Screen name="dev/push" options={{ title: 'Push test' }} />
       </Stack>
     </ThemeProvider>
