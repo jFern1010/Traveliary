@@ -18,7 +18,10 @@ export default function RootLayout() {
             name="capture/preview"
             options={{ title: 'Post this photo?', headerBackTitle: 'Camera' }}
           />
+          <Stack.Screen name="place/[placeId]" options={{ title: '', headerBackTitle: 'Back' }} />
+          <Stack.Screen name="photo/[photoId]" options={{ title: 'Photo', headerBackTitle: 'Back' }} />
           <Stack.Screen name="dev/push" options={{ title: 'Push test' }} />
+          <Stack.Screen name="dev/seed" options={{ title: 'Sample places' }} />
         </Stack>
       </ThemeProvider>
     </QueryClientProvider>
