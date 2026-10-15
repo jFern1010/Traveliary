@@ -46,7 +46,8 @@
         {
           "locationWhenInUsePermission": "Traveliary uses your location to tag your photo with the place you took it, like Zermatt, Switzerland."
         }
-      ]
+      ],
+      "expo-sqlite"
     ],
     "experiments": {
       "typedRoutes": true,

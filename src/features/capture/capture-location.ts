@@ -47,25 +47,23 @@ async function getFix(): Promise<Location.LocationObject> {
   }
 }
 
+/** Asks the phone's geocoder which place a point is in. Null when offline or nothing usable is found. */
+export async function lookUpPlace(latitude: number, longitude: number): Promise<SuggestedPlace | null> {
+  try {
+    const [address] = await Location.reverseGeocodeAsync({ latitude, longitude });
+    return suggestPlace(address);
+  } catch {
+    return null;
+  }
+}
+
 /** Reads GPS at the moment of capture and asks the phone's geocoder which place that is. */
 export async function getCaptureLocation(): Promise<CaptureLocation> {
   const { coords } = await getFix();
-
-  let place: SuggestedPlace | null = null;
-  try {
-    const [address] = await Location.reverseGeocodeAsync({
-      latitude: coords.latitude,
-      longitude: coords.longitude,
-    });
-    place = suggestPlace(address);
-  } catch {
-    place = null;
-  }
-
   return {
     latitude: coords.latitude,
     longitude: coords.longitude,
     accuracy: coords.accuracy ?? null,
-    place,
+    place: await lookUpPlace(coords.latitude, coords.longitude),
   };
 }
