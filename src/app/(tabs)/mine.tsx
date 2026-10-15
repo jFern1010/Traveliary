@@ -86,12 +86,7 @@ export default function MyTripsScreen() {
           <View style={{ marginTop: Spacing.five, alignItems: 'center', gap: Spacing.one }}>
             <Link href="/dev/seed">
               <ThemedText type="link" themeColor="textSecondary">
-                Developer: add sample places
-              </ThemedText>
-            </Link>
-            <Link href="/dev/push">
-              <ThemedText type="link" themeColor="textSecondary">
-                Developer: push notification test
+                Developer tools
               </ThemedText>
             </Link>
           </View>
