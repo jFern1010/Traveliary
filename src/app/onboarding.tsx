@@ -1,0 +1,87 @@
+import { router } from 'expo-router';
+import { SymbolView, type SFSymbol } from 'expo-symbols';
+import { ScrollView, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+import { PrimaryButton } from '@/components/primary-button';
+import { ThemedText } from '@/components/themed-text';
+import { ThemedView } from '@/components/themed-view';
+import { BrandColor, Spacing } from '@/constants/theme';
+import { markOnboardingSeen } from '@/features/onboarding/storage';
+
+const POINTS: { icon: SFSymbol; title: string; body: string }[] = [
+  {
+    icon: 'camera.fill',
+    title: 'Snap where you are',
+    body: 'Take a photo or selfie in the app. It’s tagged with the place, like Zermatt, Switzerland.',
+  },
+  {
+    icon: 'globe.europe.africa.fill',
+    title: 'Posts are public',
+    body: 'Everyone can see your photo at that place. Nothing is posted until you tap “Post publicly”.',
+  },
+  {
+    icon: 'lock.fill',
+    title: 'Your exact spot stays private',
+    body: 'Others see the place name only, never your exact position. No account or profile needed.',
+  },
+  {
+    icon: 'hand.raised.fill',
+    title: 'Be kind',
+    body: 'Respect people in your shots. Anyone can report a photo; reported photos are hidden.',
+  },
+];
+
+export default function OnboardingScreen() {
+  const insets = useSafeAreaInsets();
+
+  async function start() {
+    await markOnboardingSeen();
+    router.back();
+  }
+
+  return (
+    <ThemedView style={{ flex: 1 }}>
+      <ScrollView
+        contentContainerStyle={{
+          paddingTop: insets.top + Spacing.five,
+          paddingHorizontal: Spacing.four,
+          paddingBottom: Spacing.four,
+          gap: Spacing.four,
+        }}>
+        <View style={{ gap: Spacing.two }}>
+          <ThemedText type="title" style={{ fontSize: 40, lineHeight: 46 }}>
+            Traveliary
+          </ThemedText>
+          <ThemedText themeColor="textSecondary" style={{ fontSize: 18, lineHeight: 26 }}>
+            A travel diary in photos. See who’s been where, and add yourself to the map.
+          </ThemedText>
+        </View>
+
+        {POINTS.map((point) => (
+          <View key={point.title} style={{ flexDirection: 'row', gap: Spacing.three }}>
+            <SymbolView name={point.icon} tintColor={BrandColor} size={28} />
+            <View style={{ flex: 1, gap: Spacing.half }}>
+              <ThemedText type="smallBold" style={{ fontSize: 17 }}>
+                {point.title}
+              </ThemedText>
+              <ThemedText type="small" themeColor="textSecondary">
+                {point.body}
+              </ThemedText>
+            </View>
+          </View>
+        ))}
+      </ScrollView>
+
+      <View
+        style={{
+          flexDirection: 'row',
+          paddingHorizontal: Spacing.four,
+          paddingTop: Spacing.two,
+          paddingBottom: insets.bottom + Spacing.three,
+        }}>
+        <PrimaryButton label="Get started" onPress={start} />
+      </View>
+    </ThemedView>
+  );
+}

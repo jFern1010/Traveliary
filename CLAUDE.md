@@ -75,3 +75,12 @@ Before a milestone is called done, run `npm run typecheck && npm run lint && npm
 ## Known quirks
 - Expo Go on iOS logs a yellow warning about Android push being removed from Expo Go. On iOS it's only a warning, and remote push still works.
 - Expo Go can't upload reliably in the background. Queued uploads are sent while the app is open.
+
+## Moderation & maintenance
+- **Reports:** `report_photo` hides a photo for the reporter immediately, and for everyone at 3 reports (`status = 'hidden'`).
+  - Authors still see their own hidden photos, marked "Hidden".
+  - Place stats count visible photos only (`refresh_place_stats`).
+- **Orphaned files:** the `cleanup-orphans` Edge Function deletes storage files older than 1 day that have no photo row. It uses the same `x-webhook-secret` header as `notify-new-photo`. Run it manually:
+  `curl.exe -X POST https://<ref>.supabase.co/functions/v1/cleanup-orphans -H "x-webhook-secret: <secret>"`
+- **Onboarding:** shown once on first launch (`features/onboarding`). Developer tools are only linked in `__DEV__` builds.
+- **Known gap before an App Store release:** Apple's guideline 1.2 also requires a way to block abusive users. Anonymous users make that a design question for when profiles arrive.

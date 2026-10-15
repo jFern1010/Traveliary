@@ -62,8 +62,16 @@ function toPhoto(row: PhotoPublicRow): Photo {
   };
 }
 
+/** Matches the 'photos' bucket file_size_limit in the init migration. */
+const MAX_UPLOAD_BYTES = 2 * 1024 * 1024;
+
 async function upload(client: SupabaseClient, path: string, localUri: string) {
-  const body = await new File(localUri).arrayBuffer();
+  const file = new File(localUri);
+  if (!file.exists) throw new Error('The photo file is missing on this phone.');
+  if (file.size > MAX_UPLOAD_BYTES) {
+    throw new Error(`Photo is too large (${(file.size / 1024 / 1024).toFixed(1)} MB, max 2 MB).`);
+  }
+  const body = await file.arrayBuffer();
   // upsert: a retry after a partial failure overwrites instead of erroring.
   const { error } = await client.storage
     .from(PHOTO_BUCKET)

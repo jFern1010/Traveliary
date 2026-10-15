@@ -72,7 +72,7 @@ export default function MyTripsScreen() {
           <PhotoTile
             uri={item.thumbUrl}
             size={tile}
-            caption={item.placeName}
+            caption={item.status === 'hidden' ? `Hidden · ${item.placeName}` : item.placeName}
             accessibilityLabel={`Photo at ${item.placeName}`}
             onPress={() =>
               router.push({ pathname: '/photo/[photoId]', params: { photoId: item.id } })
@@ -82,14 +82,16 @@ export default function MyTripsScreen() {
         )}
         ListEmptyComponent={<EmptyState state={photos} />}
         ListFooterComponent={
-          // Temporary developer tools; removed before the prototype is shared.
-          <View style={{ marginTop: Spacing.five, alignItems: 'center', gap: Spacing.one }}>
-            <Link href="/dev/seed">
-              <ThemedText type="link" themeColor="textSecondary">
-                Developer tools
-              </ThemedText>
-            </Link>
-          </View>
+          // Developer tools exist only in development builds (Expo Go), never in a release build.
+          __DEV__ ? (
+            <View style={{ marginTop: Spacing.five, alignItems: 'center', gap: Spacing.one }}>
+              <Link href="/dev/seed">
+                <ThemedText type="link" themeColor="textSecondary">
+                  Developer tools
+                </ThemedText>
+              </Link>
+            </View>
+          ) : null
         }
       />
     </ThemedView>

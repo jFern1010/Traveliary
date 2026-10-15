@@ -1,11 +1,12 @@
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
-import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
+import { DarkTheme, DefaultTheme, router, Stack, ThemeProvider } from 'expo-router';
 import { useEffect } from 'react';
 import { useColorScheme } from 'react-native';
 
 import { configureNotificationHandler } from '@/features/notifications/register';
 import { offerNotificationsOnce, syncPushTokenIfAllowed } from '@/features/notifications/setup';
 import { useNotificationNavigation } from '@/features/notifications/use-notification-navigation';
+import { hasSeenOnboarding } from '@/features/onboarding/storage';
 import { useUploadQueueRunner } from '@/features/upload-queue/hooks';
 import { onUploaded } from '@/features/upload-queue/queue';
 import { configureQueryEnvironment } from '@/lib/connectivity';
@@ -19,6 +20,13 @@ configureQueryEnvironment();
 function AppServices() {
   useUploadQueueRunner();
   useNotificationNavigation();
+  useEffect(() => {
+    // First launch: explain that posts are public before anything else.
+    void hasSeenOnboarding().then((seen) => {
+      if (!seen) router.push('/onboarding');
+    });
+  }, []);
+
   useEffect(() => {
     void syncPushTokenIfAllowed();
     // A new anonymous identity must take over this device's push token right away.
@@ -49,6 +57,10 @@ export default function RootLayout() {
           />
           <Stack.Screen name="place/[placeId]" options={{ title: '', headerBackTitle: 'Back' }} />
           <Stack.Screen name="photo/[photoId]" options={{ title: 'Photo', headerBackTitle: 'Back' }} />
+          <Stack.Screen
+            name="onboarding"
+            options={{ presentation: 'fullScreenModal', headerShown: false, gestureEnabled: false }}
+          />
           <Stack.Screen name="dev/seed" options={{ title: 'Developer tools' }} />
         </Stack>
         <AppServices />
