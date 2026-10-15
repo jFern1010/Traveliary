@@ -1,16 +1,25 @@
-import { QueryClientProvider } from '@tanstack/react-query';
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import { useColorScheme } from 'react-native';
 
 import { configureNotificationHandler } from '@/features/notifications/register';
-import { queryClient } from '@/lib/query-client';
+import { useUploadQueueRunner } from '@/features/upload-queue/hooks';
+import { configureQueryEnvironment } from '@/lib/connectivity';
+import { persistOptions, queryClient } from '@/lib/query-client';
 
 configureNotificationHandler();
+configureQueryEnvironment();
+
+function UploadQueueRunner() {
+  useUploadQueueRunner();
+  return null;
+}
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   return (
-    <QueryClientProvider client={queryClient}>
+    <PersistQueryClientProvider client={queryClient} persistOptions={persistOptions}>
+      <UploadQueueRunner />
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -24,6 +33,6 @@ export default function RootLayout() {
           <Stack.Screen name="dev/seed" options={{ title: 'Sample places' }} />
         </Stack>
       </ThemeProvider>
-    </QueryClientProvider>
+    </PersistQueryClientProvider>
   );
 }
