@@ -59,12 +59,12 @@ npx supabase@latest db push                        # apply new files in supabase
 - Photo IDs are generated on the phone (`draft.id`) so retrying a post never duplicates it.
 
 ## Push notifications
-- **Flow:** `photos` INSERT → Database Webhook → Edge Function `notify-new-photo` → `claim_push_recipients` (picks other posters at that place and throttles to 1 per hour per place) → Expo Push API.
+- **Flow:** `photos` INSERT → trigger `notify_new_photo` (pg_net; URL + secret in Vault as `notify_new_photo_url` / `notify_new_photo_secret`) → Edge Function `notify-new-photo` → `claim_push_recipients` (picks other posters at that place and throttles to 1 per hour per place) → Expo Push API.
 - **Edge Function:**
   - It runs on Deno. `supabase/functions/**/index.ts` is excluded from tsc and ESLint.
   - Pure helpers live in `messages.ts` and are tested with Jest.
   - Deploy: `npx supabase@latest functions deploy notify-new-photo --no-verify-jwt --use-api`.
-  - Requests are authenticated by the `WEBHOOK_SECRET` secret, which the webhook sends as the `x-webhook-secret` header.
+  - Requests are authenticated by the `WEBHOOK_SECRET` function secret, which the trigger sends as the `x-webhook-secret` header (from Vault).
 - **App:**
   - Notifications are offered after the first successful upload (`offerNotificationsOnce`).
   - The token is re-synced at launch if already allowed.

@@ -1,9 +1,9 @@
-// Edge Function: called by a Database Webhook on photos INSERT.
+// Edge Function: called by the photos INSERT trigger (pg_net; see the photo_insert_trigger migration).
 // Sends "New photo in <place>" to everyone else who has posted at that place (max 1/hour/place).
 //
 // Deploy:  npx supabase@latest functions deploy notify-new-photo --no-verify-jwt --use-api
 // Secret:  npx supabase@latest secrets set WEBHOOK_SECRET=<random string>
-// The webhook must send the same value in the `x-webhook-secret` header.
+// The trigger sends the same value (Vault secret notify_new_photo_secret) in `x-webhook-secret`.
 
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
