@@ -7,6 +7,8 @@ import { PrimaryButton } from '@/components/primary-button';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { BrandColor, Spacing } from '@/constants/theme';
+import { useReportPhoto } from '@/features/moderation/api';
+import { REPORT_REASONS, reportOutcomeMessage } from '@/features/moderation/reasons';
 import { useDeleteMyPhoto, usePhoto } from '@/features/photos/hooks';
 import { formatDate } from '@/lib/format';
 
@@ -14,6 +16,7 @@ export default function PhotoScreen() {
   const { photoId, from } = useLocalSearchParams<{ photoId: string; from?: string }>();
   const photo = usePhoto(photoId);
   const deletePhoto = useDeleteMyPhoto();
+  const reportPhoto = useReportPhoto();
 
   if (photo.isPending && photo.fetchStatus === 'paused') {
     return (
@@ -59,6 +62,26 @@ export default function PhotoScreen() {
     ]);
   }
 
+  function chooseReportReason() {
+    Alert.alert('Report this photo', 'Why should it be removed?', [
+      ...REPORT_REASONS.map((r) => ({
+        text: r.label,
+        onPress: () =>
+          reportPhoto.mutate(
+            { photoId: p.id, reason: r.value },
+            {
+              onSuccess: (outcome) =>
+                Alert.alert('Reported', reportOutcomeMessage(outcome), [
+                  { text: 'OK', onPress: () => router.back() },
+                ]),
+              onError: (e) => Alert.alert('Couldn’t report', e.message),
+            },
+          ),
+      })),
+      { text: 'Cancel', style: 'cancel' },
+    ]);
+  }
+
   return (
     <ThemedView style={{ flex: 1 }}>
       <ScrollView
@@ -100,6 +123,28 @@ export default function PhotoScreen() {
             Taken {formatDate(p.takenAt)}
             {p.isMine ? ' · by you' : ''}
           </ThemedText>
+
+          {p.isMine && p.status === 'hidden' && (
+            <ThemedView
+              type="backgroundElement"
+              style={{ flexDirection: 'row', gap: Spacing.two, padding: Spacing.three, borderRadius: 12 }}>
+              <SymbolView name="eye.slash" tintColor="#E5484D" size={18} />
+              <ThemedText type="small" style={{ flex: 1 }}>
+                Hidden: several travelers reported this photo, so only you can see it.
+              </ThemedText>
+            </ThemedView>
+          )}
+
+          {!p.isMine && (
+            <View style={{ flexDirection: 'row', marginTop: Spacing.three }}>
+              <PrimaryButton
+                label="Report photo"
+                variant="secondary"
+                onPress={chooseReportReason}
+                loading={reportPhoto.isPending}
+              />
+            </View>
+          )}
 
           {p.isMine && (
             <View style={{ flexDirection: 'row', marginTop: Spacing.three }}>
