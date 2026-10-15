@@ -57,6 +57,19 @@ npx supabase@latest db push                        # apply new files in supabase
   - Writes go through the `create_photo` / `delete_my_photo` RPCs.
   - Storage files live at `photos/<uid>/<photoId>.jpg` and `_thumb.jpg`.
 - Photo IDs are generated on the phone (`draft.id`) so retrying a post never duplicates it.
+
+## Push notifications
+- **Flow:** `photos` INSERT → Database Webhook → Edge Function `notify-new-photo` → `claim_push_recipients` (picks other posters at that place and throttles to 1 per hour per place) → Expo Push API.
+- **Edge Function:**
+  - It runs on Deno. `supabase/functions/**/index.ts` is excluded from tsc and ESLint.
+  - Pure helpers live in `messages.ts` and are tested with Jest.
+  - Deploy: `npx supabase@latest functions deploy notify-new-photo --no-verify-jwt --use-api`.
+  - Requests are authenticated by the `WEBHOOK_SECRET` secret, which the webhook sends as the `x-webhook-secret` header.
+- **App:**
+  - Notifications are offered after the first successful upload (`offerNotificationsOnce`).
+  - The token is re-synced at launch if already allowed.
+  - Tapping a notification opens `place/[placeId]`.
+- **Single-phone testing:** My Trips → Developer tools → Simulate a visitor.
 Before a milestone is called done, run `npm run typecheck && npm run lint && npm test`.
 
 ## Known quirks

@@ -44,21 +44,25 @@ export const SAMPLES: Sample[] = [
 const WIDTH = 1200;
 const HEIGHT = 1600;
 
-/** Dev only: downloads placeholder photos (picsum.photos) and posts them as the current user. */
-export async function seedSamplePlaces(onProgress: (message: string) => void): Promise<number> {
+/** Downloads a placeholder photo (picsum.photos) and processes it like a camera capture. */
+export async function samplePhoto(seed: string) {
   const dir = new Directory(Paths.cache, 'seed');
   if (!dir.exists) dir.create();
+  const target = new File(dir, `${seed}.jpg`);
+  if (target.exists) target.delete();
+  const downloaded = await File.downloadFileAsync(
+    `https://picsum.photos/seed/traveliary-${seed}/${WIDTH}/${HEIGHT}.jpg`,
+    target,
+  );
+  return processPhoto(downloaded.uri, { width: WIDTH, height: HEIGHT });
+}
 
+/** Dev only: posts placeholder photos at the sample spots as the current user. */
+export async function seedSamplePlaces(onProgress: (message: string) => void): Promise<number> {
   let posted = 0;
   for (const [index, sample] of SAMPLES.entries()) {
     onProgress(`Posting ${index + 1}/${SAMPLES.length}: ${sample.label}…`);
-    const target = new File(dir, `sample-${index}.jpg`);
-    if (target.exists) target.delete();
-    const downloaded = await File.downloadFileAsync(
-      `https://picsum.photos/seed/traveliary-${index}/${WIDTH}/${HEIGHT}.jpg`,
-      target,
-    );
-    const files = await processPhoto(downloaded.uri, { width: WIDTH, height: HEIGHT });
+    const files = await samplePhoto(String(index));
     await postPhoto({
       photoId: uuidv4(),
       takenAt: new Date().toISOString(),

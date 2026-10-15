@@ -72,6 +72,8 @@ export async function placesNear(
 export type PlaceDetail = {
   id: string;
   name: string;
+  latitude: number;
+  longitude: number;
   region: string | null;
   country: string | null;
   photoCount: number;
@@ -82,11 +84,13 @@ export async function getPlace(placeId: string): Promise<PlaceDetail> {
   await ensureUserId();
   const { data, error } = await supabase
     .from('places')
-    .select('id, name, region, country, photo_count, last_photo_at')
+    .select('id, name, lat, lng, region, country, photo_count, last_photo_at')
     .eq('id', placeId)
     .single<{
       id: string;
       name: string;
+      lat: number;
+      lng: number;
       region: string | null;
       country: string | null;
       photo_count: number;
@@ -96,6 +100,8 @@ export async function getPlace(placeId: string): Promise<PlaceDetail> {
   return {
     id: data.id,
     name: data.name,
+    latitude: data.lat,
+    longitude: data.lng,
     region: data.region,
     country: data.country,
     photoCount: data.photo_count,
