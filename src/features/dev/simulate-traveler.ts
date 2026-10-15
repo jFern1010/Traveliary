@@ -49,3 +49,30 @@ export async function simulateOtherTraveler(onProgress: (message: string) => voi
   });
   return place.name;
 }
+
+/**
+ * Dev only: three temporary anonymous travelers report your most recent photo, which should
+ * reach the auto-hide threshold. Afterwards My Trips shows it as "Hidden" and it leaves the map.
+ */
+export async function simulateReports(onProgress: (message: string) => void): Promise<string> {
+  await ensureUserId();
+  const [latest] = await listMyPhotos();
+  if (!latest) throw new Error('Post a photo first, so there is something to report.');
+
+  let outcome = '';
+  for (let i = 1; i <= 3; i++) {
+    onProgress(`Reporter ${i}/3 is reporting your photo at ${latest.placeName}…`);
+    const reporter = createClient(env.supabaseUrl, env.supabaseKey, {
+      auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+    });
+    const { error: signInError } = await reporter.auth.signInAnonymously();
+    if (signInError) throw signInError;
+    const { data, error } = await reporter.rpc('report_photo', {
+      p_photo_id: latest.id,
+      p_reason: 'other',
+    });
+    if (error) throw new Error(error.message);
+    outcome = String(data);
+  }
+  return `${latest.placeName}: last report returned “${outcome}”.`;
+}

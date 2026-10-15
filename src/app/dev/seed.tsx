@@ -7,20 +7,22 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 import { SAMPLES, seedSamplePlaces } from '@/features/dev/seed';
-import { simulateOtherTraveler } from '@/features/dev/simulate-traveler';
+import { simulateOtherTraveler, simulateReports } from '@/features/dev/simulate-traveler';
 
-/** Developer tools: sample data for Explore, and a one-phone push notification test. */
+/** Developer tools: sample data for Explore, plus one-phone tests for push and reporting. */
 export default function DevToolsScreen() {
   const queryClient = useQueryClient();
   const [status, setStatus] = useState<string | null>(null);
-  const [busy, setBusy] = useState<'seed' | 'visitor' | null>(null);
+  const [busy, setBusy] = useState<'seed' | 'visitor' | 'reports' | null>(null);
 
-  async function run(kind: 'seed' | 'visitor') {
+  async function run(kind: 'seed' | 'visitor' | 'reports') {
     setBusy(kind);
     try {
       if (kind === 'seed') {
         const count = await seedSamplePlaces(setStatus);
         setStatus(`Done: posted ${count} sample photos.`);
+      } else if (kind === 'reports') {
+        setStatus(`Done: ${await simulateReports(setStatus)} Check My Trips for the “Hidden” label.`);
       } else {
         const placeName = await simulateOtherTraveler(setStatus);
         setStatus(
@@ -70,6 +72,22 @@ export default function DevToolsScreen() {
             label="Simulate a visitor"
             onPress={() => run('visitor')}
             loading={busy === 'visitor'}
+            disabled={busy !== null}
+          />
+        </View>
+
+        <ThemedText type="smallBold" style={{ fontSize: 18, marginTop: Spacing.four }}>
+          Simulate reports
+        </ThemedText>
+        <ThemedText themeColor="textSecondary">
+          Three temporary travelers report your most recent photo. At 3 reports it is hidden for
+          everyone except you.
+        </ThemedText>
+        <View style={{ flexDirection: 'row' }}>
+          <PrimaryButton
+            label="Report my latest photo ×3"
+            onPress={() => run('reports')}
+            loading={busy === 'reports'}
             disabled={busy !== null}
           />
         </View>
