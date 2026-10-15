@@ -1,3 +1,4 @@
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { File } from 'expo-file-system';
 
 import { ensureUserId } from '@/features/auth/session';
@@ -61,26 +62,34 @@ function toPhoto(row: PhotoPublicRow): Photo {
   };
 }
 
-async function upload(path: string, localUri: string) {
+async function upload(client: SupabaseClient, path: string, localUri: string) {
   const body = await new File(localUri).arrayBuffer();
   // upsert: a retry after a partial failure overwrites instead of erroring.
-  const { error } = await supabase.storage
+  const { error } = await client.storage
     .from(PHOTO_BUCKET)
     .upload(path, body, { contentType: 'image/jpeg', upsert: true });
   if (error) throw new Error(`Upload failed: ${error.message}`);
 }
 
+export type PostPhotoInput = Omit<CreatePhotoInput, 'width' | 'height'> & { files: ProcessedPhoto };
+
 /** Uploads the photo + thumbnail, then registers it. Safe to retry with the same photoId. */
-export async function postPhoto(
-  input: Omit<CreatePhotoInput, 'width' | 'height'> & { files: ProcessedPhoto },
+export async function postPhoto(input: PostPhotoInput): Promise<PostedPhoto> {
+  return postPhotoAs(supabase, await ensureUserId(), input);
+}
+
+/** Same as `postPhoto`, but as whoever is signed in on `client` (used by developer tools). */
+export async function postPhotoAs(
+  client: SupabaseClient,
+  userId: string,
+  input: PostPhotoInput,
 ): Promise<PostedPhoto> {
-  const userId = await ensureUserId();
   const paths = photoStoragePaths(userId, input.photoId);
 
-  await upload(paths.full, input.files.full.uri);
-  await upload(paths.thumb, input.files.thumb.uri);
+  await upload(client, paths.full, input.files.full.uri);
+  await upload(client, paths.thumb, input.files.thumb.uri);
 
-  const { data, error } = await supabase.rpc(
+  const { data, error } = await client.rpc(
     'create_photo',
     buildCreatePhotoArgs({
       ...input,
