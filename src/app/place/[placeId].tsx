@@ -1,6 +1,7 @@
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { ActivityIndicator, FlatList, View, useWindowDimensions } from 'react-native';
 
+import { OfflineBanner } from '@/components/offline-banner';
 import { gridTileSize, PhotoTile } from '@/components/photo-tile';
 import { PrimaryButton } from '@/components/primary-button';
 import { ThemedText } from '@/components/themed-text';
@@ -44,6 +45,7 @@ export default function PlaceScreen() {
         contentContainerStyle={{ gap: GAP, paddingHorizontal: Spacing.three, paddingBottom: Spacing.six }}
         ListHeaderComponent={
           <View style={{ paddingVertical: Spacing.three, gap: Spacing.half }}>
+            <OfflineBanner style={{ marginBottom: Spacing.two }} />
             {subtitle ? <ThemedText themeColor="textSecondary">{subtitle}</ThemedText> : null}
             <ThemedText type="small" themeColor="textSecondary">
               {stats}
@@ -73,7 +75,11 @@ export default function PlaceScreen() {
           photos.isFetchingNextPage ? <ActivityIndicator style={{ marginTop: Spacing.three }} /> : null
         }
         ListEmptyComponent={
-          photos.isPending ? (
+          photos.isPending && photos.fetchStatus === 'paused' ? (
+            <ThemedText themeColor="textSecondary" style={{ textAlign: 'center', paddingTop: Spacing.five }}>
+              This place hasn’t been opened before. Its photos will load when you’re back online.
+            </ThemedText>
+          ) : photos.isPending ? (
             <ActivityIndicator style={{ marginTop: Spacing.six }} />
           ) : photos.isError ? (
             <View style={{ gap: Spacing.three, alignItems: 'center', paddingTop: Spacing.five }}>

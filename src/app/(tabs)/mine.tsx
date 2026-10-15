@@ -2,6 +2,7 @@ import { Link, router } from 'expo-router';
 import type { ReactNode } from 'react';
 import { ActivityIndicator, Alert, FlatList, RefreshControl, View, useWindowDimensions } from 'react-native';
 
+import { OfflineBanner } from '@/components/offline-banner';
 import { gridTileSize, PhotoTile } from '@/components/photo-tile';
 import { PrimaryButton } from '@/components/primary-button';
 import { ThemedText } from '@/components/themed-text';
@@ -9,6 +10,7 @@ import { ThemedView } from '@/components/themed-view';
 import { BottomTabInset, Spacing } from '@/constants/theme';
 import type { Photo } from '@/features/photos/api';
 import { useDeleteMyPhoto, useMyPhotos } from '@/features/photos/hooks';
+import { PendingUploads } from '@/features/upload-queue/pending-uploads';
 import { isBackendConfigured } from '@/lib/env';
 
 const COLUMNS = 3;
@@ -60,6 +62,10 @@ export default function MyTripsScreen() {
                 {count} {count === 1 ? 'photo' : 'photos'} posted · long-press to delete
               </ThemedText>
             )}
+            <OfflineBanner style={{ marginTop: Spacing.two }} />
+            <View style={{ marginTop: Spacing.two }}>
+              <PendingUploads />
+            </View>
           </View>
         }
         renderItem={({ item }) => (
@@ -103,6 +109,9 @@ function EmptyState({ state }: { state: ReturnType<typeof useMyPhotos> }) {
         body="Add your Supabase URL and publishable key to .env.local, then restart npm start."
       />
     );
+  }
+  if (state.isPending && state.fetchStatus === 'paused') {
+    return <Message title="Offline" body="Your posted photos will load when you’re back online." />;
   }
   if (state.isPending) {
     return (

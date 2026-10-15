@@ -15,6 +15,15 @@ export default function PhotoScreen() {
   const photo = usePhoto(photoId);
   const deletePhoto = useDeleteMyPhoto();
 
+  if (photo.isPending && photo.fetchStatus === 'paused') {
+    return (
+      <ThemedView style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: Spacing.four }}>
+        <ThemedText themeColor="textSecondary" style={{ textAlign: 'center' }}>
+          You’re offline. This photo will load when you’re back online.
+        </ThemedText>
+      </ThemedView>
+    );
+  }
   if (photo.isPending) {
     return (
       <ThemedView style={{ flex: 1, justifyContent: 'center' }}>

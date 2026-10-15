@@ -9,7 +9,8 @@ A travel diary built from photos. Photos are taken in the app, tied to the GPS p
 - **Target:** iOS via **Expo Go on a physical iPhone**. The developer uses Windows with no Mac, so there's no simulator. Android comes later.
 - **Only Expo Go-compatible libraries.** Anything that needs a development build is a big architecture change, so ask first.
 - **Backend:** Supabase free tier (Postgres + PostGIS, Storage, anonymous auth, Edge Functions). Added in M2.
-- **Server data:** TanStack Query (persisted to AsyncStorage). **Offline upload queue:** expo-sqlite + expo-file-system + NetInfo (M4).
+- **Server data:** TanStack Query, persisted to AsyncStorage for 7 days so viewed places work offline. NetInfo drives `onlineManager`, so queries pause while offline.
+- **Posting:** "Post publicly" only enqueues (expo-sqlite row + files in the documents folder). The queue runner in `features/upload-queue/queue.ts` uploads in the background with backoff and wakes on reconnect, app foreground and timers.
 - **Push:** expo-notifications + Expo Push Service, sent from a Supabase Edge Function (M5).
 
 ## Layout
@@ -17,7 +18,7 @@ A travel diary built from photos. Photos are taken in the app, tied to the GPS p
   - `(tabs)/` contains `index` (Explore), `capture` (Camera) and `mine` (My Trips).
   - Pushed screens sit beside it: `place/[placeId]`, `photo/[photoId]`, `capture/preview`.
   - `dev/` holds temporary developer screens.
-- `src/features/<feature>/` holds the logic and API calls for each feature: `capture`, `places`, `photos`, `uploadQueue`, `notifications`, `moderation`.
+- `src/features/<feature>/` holds the logic and API calls for each feature: `capture`, `places`, `photos`, `upload-queue`, `notifications`, `moderation`, `dev`.
 - `src/components/` holds shared UI. `src/constants/theme.ts` holds colors and spacing. `src/lib/` holds clients (supabase, queryClient, env).
 - `supabase/migrations/` holds SQL migrations and `supabase/functions/` holds Edge Functions.
 - `__tests__/` holds Jest unit tests. Import with the `@/` path alias, which maps to `src/`.

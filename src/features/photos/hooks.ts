@@ -1,7 +1,7 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { isBackendConfigured } from '@/lib/env';
-import { deleteMyPhoto, getPhoto, listMyPhotos, listPlacePhotos, postPhoto } from './api';
+import { deleteMyPhoto, getPhoto, listMyPhotos, listPlacePhotos } from './api';
 
 export const photoKeys = {
   all: ['photos'] as const,
@@ -36,7 +36,7 @@ export function usePhoto(photoId: string) {
   });
 }
 
-/** Posting or deleting changes galleries, counts and map pins, so refresh all of them. */
+/** Deleting changes galleries, counts and map pins, so refresh all of them. */
 function useInvalidateAfterChange() {
   const queryClient = useQueryClient();
   return () =>
@@ -44,11 +44,6 @@ function useInvalidateAfterChange() {
       queryClient.invalidateQueries({ queryKey: photoKeys.all }),
       queryClient.invalidateQueries({ queryKey: ['places'] }),
     ]);
-}
-
-export function usePostPhoto() {
-  const invalidate = useInvalidateAfterChange();
-  return useMutation({ mutationFn: postPhoto, onSuccess: invalidate });
 }
 
 export function useDeleteMyPhoto() {

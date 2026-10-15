@@ -5,6 +5,7 @@ import MapView, { Marker } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { CameraIconButton } from '@/components/camera-control';
+import { OfflineBanner } from '@/components/offline-banner';
 import { PlaceRow } from '@/components/place-row';
 import { PrimaryButton } from '@/components/primary-button';
 import { SegmentedPill } from '@/components/segmented-pill';
@@ -46,6 +47,7 @@ export default function ExploreScreen() {
         style={{ position: 'absolute', top: insets.top + Spacing.two, left: 0, right: 0 }}
         pointerEvents="box-none">
         <SegmentedPill options={MODES} value={mode} onChange={setMode} />
+        <OfflineBanner style={{ marginTop: Spacing.two, marginHorizontal: Spacing.three }} />
       </View>
     </ThemedView>
   );
@@ -155,6 +157,13 @@ function NearbyList({ user }: { user: ReturnType<typeof useUserPosition> }) {
         body="Allow location to find places near you that travelers have posted from.">
         {user.canAsk && <PrimaryButton label="Allow location" onPress={user.requestPermission} />}
       </EmptyMessage>
+    );
+  } else if (places.isPending && places.fetchStatus === 'paused') {
+    empty = (
+      <EmptyMessage
+        title="Offline"
+        body="Nearby places will load when you’re back online. Places you opened before still work."
+      />
     );
   } else if (!user.position || places.isPending) {
     empty = <ActivityIndicator style={{ marginTop: Spacing.six }} />;
