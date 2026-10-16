@@ -84,3 +84,12 @@ Before a milestone is called done, run `npm run typecheck && npm run lint && npm
   `curl.exe -X POST https://<ref>.supabase.co/functions/v1/cleanup-orphans -H "x-webhook-secret: <secret>"`
 - **Onboarding:** shown once on first launch (`features/onboarding`). Developer tools are only linked in `__DEV__` builds.
 - **Known gap before an App Store release:** Apple's guideline 1.2 also requires a way to block abusive users. Anonymous users make that a design question for when profiles arrive.
+
+## Beta distribution
+- **iPhone testers:** use Expo Go plus EAS Update.
+  - Each tester needs their own Expo account, invited to the `jferns-team` organization (Viewer role works).
+  - They open `exp://u.expo.dev/24f204a2-6e3e-4fff-8c0a-3ce8a3c3a3f0?channel-name=expo-go&runtime-version=exposdk:57.0.0`
+- **Publish a new beta version:**
+  `EXPO_GO_UPDATE=1 npx eas-cli@latest update --channel expo-go --platform ios --environment preview --message "<what changed>"`
+- **Keys used:** the update uses the Supabase URL and key stored in the EAS **preview** environment (`eas env:list preview`), not `.env.local`.
+- **Plan:** see `docs/beta-plan.md`.
