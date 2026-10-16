@@ -17,7 +17,12 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ]
     },
     "web": {
       "output": "static",
@@ -59,6 +64,12 @@
         "projectId": "24f204a2-6e3e-4fff-8c0a-3ce8a3c3a3f0"
       }
     },
-    "owner": "jferns-team"
+    "owner": "jferns-team",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/24f204a2-6e3e-4fff-8c0a-3ce8a3c3a3f0"
+    }
   }
 }
