@@ -7,7 +7,7 @@ import { PrimaryButton } from '@/components/primary-button';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { BrandColor, Spacing } from '@/constants/theme';
-import { markOnboardingSeen } from '@/features/onboarding/storage';
+import { acceptCurrentTerms } from '@/features/onboarding/storage';
 
 const POINTS: { icon: SFSymbol; title: string; body: string }[] = [
   {
@@ -32,11 +32,15 @@ const POINTS: { icon: SFSymbol; title: string; body: string }[] = [
   },
 ];
 
+function openLegal(doc: 'terms' | 'privacy') {
+  router.push({ pathname: '/legal/[doc]', params: { doc } });
+}
+
 export default function OnboardingScreen() {
   const insets = useSafeAreaInsets();
 
   async function start() {
-    await markOnboardingSeen();
+    await acceptCurrentTerms();
     router.back();
   }
 
@@ -73,6 +77,20 @@ export default function OnboardingScreen() {
         ))}
       </ScrollView>
 
+      <ThemedText
+        type="small"
+        themeColor="textSecondary"
+        style={{ textAlign: 'center', paddingHorizontal: Spacing.four }}>
+        By continuing you agree to the{' '}
+        <ThemedText type="small" style={{ color: BrandColor }} onPress={() => openLegal('terms')}>
+          Terms of Use
+        </ThemedText>
+        , including zero tolerance for abusive content, and the{' '}
+        <ThemedText type="small" style={{ color: BrandColor }} onPress={() => openLegal('privacy')}>
+          Privacy Policy
+        </ThemedText>
+        .
+      </ThemedText>
       <View
         style={{
           flexDirection: 'row',
@@ -80,7 +98,7 @@ export default function OnboardingScreen() {
           paddingTop: Spacing.two,
           paddingBottom: insets.bottom + Spacing.three,
         }}>
-        <PrimaryButton label="Get started" onPress={start} />
+        <PrimaryButton label="Agree & continue" onPress={start} />
       </View>
     </ThemedView>
   );
