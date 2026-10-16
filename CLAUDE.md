@@ -106,3 +106,17 @@ Before a milestone is called done, run `npm run typecheck && npm run lint && npm
 - **Legal:**
   - Terms and Privacy texts live in `src/features/legal/content.ts`, with contact details in `src/constants/app-info.ts`.
   - Onboarding requires "Agree & continue"; acceptance is stored per `LEGAL_VERSION`. Bump it when the texts change materially.
+
+## Release setup (beta B2)
+- **Identity:** iOS bundle ID and Android package are `com.lyf.traveliary`. They can never change after release.
+  - `version` in `app.json` is the user-facing version (0.9.0 = beta).
+  - Build numbers are managed remotely by EAS (`appVersionSource: remote`, `autoIncrement` for production).
+- **Icons:** generated from `assets/brand/logo-source.png` by `node scripts/make-icons.js assets/brand/logo-source.png assets/images`.
+  - iOS icon is opaque, full-bleed.
+  - Android adaptive icon is the tile on a cream (`#FEF9EF`) background.
+  - The splash screen uses the same cream.
+- **`eas.json` profiles:**
+  - `preview`: internal distribution, Android APK, channel `preview`, EAS env `preview`.
+  - `production`: store builds, channel `production`, EAS env `production`.
+- **Runtime version:** builds use `appVersion`. Expo Go updates use `exposdk:57.0.0` via `EXPO_GO_UPDATE=1` (see `app.config.js`).
+- **App Store settings:** `ITSAppUsesNonExemptEncryption: false` (no export-compliance prompt). `supportsTablet: false` (iPhone only, so no iPad screenshots are needed).
