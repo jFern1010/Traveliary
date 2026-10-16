@@ -6,7 +6,7 @@ import { useColorScheme } from 'react-native';
 import { configureNotificationHandler } from '@/features/notifications/register';
 import { offerNotificationsOnce, syncPushTokenIfAllowed } from '@/features/notifications/setup';
 import { useNotificationNavigation } from '@/features/notifications/use-notification-navigation';
-import { hasSeenOnboarding } from '@/features/onboarding/storage';
+import { hasAcceptedCurrentTerms } from '@/features/onboarding/storage';
 import { useUploadQueueRunner } from '@/features/upload-queue/hooks';
 import { onUploaded } from '@/features/upload-queue/queue';
 import { configureQueryEnvironment } from '@/lib/connectivity';
@@ -21,9 +21,9 @@ function AppServices() {
   useUploadQueueRunner();
   useNotificationNavigation();
   useEffect(() => {
-    // First launch: explain that posts are public before anything else.
-    void hasSeenOnboarding().then((seen) => {
-      if (!seen) router.push('/onboarding');
+    // First launch (or new Terms): explain that posts are public and ask for agreement.
+    void hasAcceptedCurrentTerms().then((accepted) => {
+      if (!accepted) router.push('/onboarding');
     });
   }, []);
 
@@ -60,6 +60,11 @@ export default function RootLayout() {
           <Stack.Screen
             name="onboarding"
             options={{ presentation: 'fullScreenModal', headerShown: false, gestureEnabled: false }}
+          />
+          <Stack.Screen name="about" options={{ title: 'About', headerBackTitle: 'Back' }} />
+          <Stack.Screen
+            name="legal/[doc]"
+            options={{ title: '', presentation: 'modal', headerBackTitle: 'Back' }}
           />
           <Stack.Screen name="dev/seed" options={{ title: 'Developer tools' }} />
         </Stack>

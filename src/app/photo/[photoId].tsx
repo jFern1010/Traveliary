@@ -7,7 +7,7 @@ import { PrimaryButton } from '@/components/primary-button';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { BrandColor, Spacing } from '@/constants/theme';
-import { useReportPhoto } from '@/features/moderation/api';
+import { useBlockAuthor, useReportPhoto } from '@/features/moderation/api';
 import { REPORT_REASONS, reportOutcomeMessage } from '@/features/moderation/reasons';
 import { useDeleteMyPhoto, usePhoto } from '@/features/photos/hooks';
 import { formatDate } from '@/lib/format';
@@ -17,6 +17,7 @@ export default function PhotoScreen() {
   const photo = usePhoto(photoId);
   const deletePhoto = useDeleteMyPhoto();
   const reportPhoto = useReportPhoto();
+  const blockAuthor = useBlockAuthor();
 
   if (photo.isPending && photo.fetchStatus === 'paused') {
     return (
@@ -82,6 +83,25 @@ export default function PhotoScreen() {
     ]);
   }
 
+  function confirmBlock() {
+    Alert.alert(
+      'Block this traveler?',
+      'You won’t see any of their photos or get notifications about them. They won’t be told. You can unblock everyone from About.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Block',
+          style: 'destructive',
+          onPress: () =>
+            blockAuthor.mutate(p.id, {
+              onSuccess: () => router.back(),
+              onError: (e) => Alert.alert('Couldn’t block', e.message),
+            }),
+        },
+      ],
+    );
+  }
+
   return (
     <ThemedView style={{ flex: 1 }}>
       <ScrollView
@@ -136,12 +156,18 @@ export default function PhotoScreen() {
           )}
 
           {!p.isMine && (
-            <View style={{ flexDirection: 'row', marginTop: Spacing.three }}>
+            <View style={{ flexDirection: 'row', gap: Spacing.two, marginTop: Spacing.three }}>
               <PrimaryButton
                 label="Report photo"
                 variant="secondary"
                 onPress={chooseReportReason}
                 loading={reportPhoto.isPending}
+              />
+              <PrimaryButton
+                label="Block traveler"
+                variant="secondary"
+                onPress={confirmBlock}
+                loading={blockAuthor.isPending}
               />
             </View>
           )}

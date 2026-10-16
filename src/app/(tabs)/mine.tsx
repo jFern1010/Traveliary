@@ -1,13 +1,14 @@
 import { Link, router } from 'expo-router';
 import type { ReactNode } from 'react';
-import { ActivityIndicator, Alert, FlatList, RefreshControl, View, useWindowDimensions } from 'react-native';
+import { SymbolView } from 'expo-symbols';
+import { ActivityIndicator, Alert, FlatList, Pressable, RefreshControl, View, useWindowDimensions } from 'react-native';
 
 import { OfflineBanner } from '@/components/offline-banner';
 import { gridTileSize, PhotoTile } from '@/components/photo-tile';
 import { PrimaryButton } from '@/components/primary-button';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { BottomTabInset, Spacing } from '@/constants/theme';
+import { BottomTabInset, BrandColor, Spacing } from '@/constants/theme';
 import type { Photo } from '@/features/photos/api';
 import { useDeleteMyPhoto, useMyPhotos } from '@/features/photos/hooks';
 import { PendingUploads } from '@/features/upload-queue/pending-uploads';
@@ -56,7 +57,16 @@ export default function MyTripsScreen() {
         }
         ListHeaderComponent={
           <View style={{ paddingTop: Spacing.three, paddingBottom: Spacing.three, gap: Spacing.one }}>
-            <ThemedText type="subtitle">My Trips</ThemedText>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+              <ThemedText type="subtitle">My Trips</ThemedText>
+              <Pressable
+                onPress={() => router.push('/about')}
+                hitSlop={12}
+                accessibilityRole="button"
+                accessibilityLabel="About, feedback, privacy and your data">
+                <SymbolView name="info.circle" tintColor={BrandColor} size={26} />
+              </Pressable>
+            </View>
             {count > 0 && (
               <ThemedText themeColor="textSecondary">
                 {count} {count === 1 ? 'photo' : 'photos'} posted · long-press to delete

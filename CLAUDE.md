@@ -93,3 +93,16 @@ Before a milestone is called done, run `npm run typecheck && npm run lint && npm
   `EXPO_GO_UPDATE=1 npx eas-cli@latest update --channel expo-go --platform ios --environment preview --message "<what changed>"`
 - **Keys used:** the update uses the Supabase URL and key stored in the EAS **preview** environment (`eas env:list preview`), not `.env.local`.
 - **Plan:** see `docs/beta-plan.md`.
+
+## Safety, legal & account (beta B1)
+- **Blocks:**
+  - `block_photo_author` blocks the anonymous author of a photo; the app never learns who it is.
+  - Blocked authors are excluded from `photos_public`, from map and nearby counts (computed per viewer in `places_in_bounds` / `places_near`), and from pushes (`claim_push_recipients`).
+  - "Unblock all" is on the About screen.
+- **Delete my data:**
+  - About → Delete calls the `delete-account` Edge Function (deploy with `--no-verify-jwt --use-api`; it checks the user's JWT itself).
+  - The function calls `delete_user_data` (service role only), removes the user's storage folder, then deletes the auth user.
+  - The app then clears its session, query cache and upload queue.
+- **Legal:**
+  - Terms and Privacy texts live in `src/features/legal/content.ts`, with contact details in `src/constants/app-info.ts`.
+  - Onboarding requires "Agree & continue"; acceptance is stored per `LEGAL_VERSION`. Bump it when the texts change materially.

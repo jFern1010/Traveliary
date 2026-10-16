@@ -212,3 +212,13 @@ export async function startQueue(): Promise<void> {
 
   void kick();
 }
+
+/** Discards every queued photo that isn't mid-upload (used by "Delete my data"). */
+export async function clearQueue(): Promise<void> {
+  for (const item of snapshot) {
+    if (item.status === 'uploading') continue;
+    await db.deleteItem(item.id);
+    deleteFiles(item);
+  }
+  await refresh();
+}

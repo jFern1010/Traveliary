@@ -54,3 +54,8 @@ export async function offerNotificationsOnce(): Promise<void> {
     console.warn('Notification offer failed:', e);
   }
 }
+
+/** After "Delete my data": offer notifications again to the new identity after its first post. */
+export async function resetNotificationOffer(): Promise<void> {
+  await AsyncStorage.removeItem(PROMPTED_KEY);
+}
