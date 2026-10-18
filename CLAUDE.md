@@ -140,3 +140,13 @@ Before a milestone is called done, run `npm run typecheck && npm run lint && npm
 
 - **Linked project:** the Supabase CLI applies to whichever project is linked (`npx supabase@latest link --project-ref <ref>`). Every migration and function deploy must be applied to **both** projects. Check the linked ref before `db push`.
 - **Separate secrets:** each project has its own `WEBHOOK_SECRET` function secret and Vault secrets (`notify_new_photo_url`, `notify_new_photo_secret`).
+
+## Running the beta (B5)
+- **Tester guide:** `docs/beta/tester-guide.md`. **Feedback form questions:** `docs/beta/feedback-form.md`.
+- **Metrics:** `supabase/queries/beta-metrics.sql`. **Moderation:** `supabase/queries/moderation.sql` + `docs/beta/moderation.md` (twice a week). Both run in the **prod** SQL Editor.
+- **Release a fix to testers:**
+  1. Run the checks (`npm run typecheck && npm run lint && npm test`).
+  2. Publish to **both** channels:
+     - `npx eas-cli@latest update --channel preview --platform android --environment preview --message "…"`
+     - `EXPO_GO_UPDATE=1 npx eas-cli@latest update --channel expo-go --platform ios --environment preview --message "…"`
+- **Rebuild the APK** (instead of only updating) when native code, config, or **EAS env values** change. A fresh install runs the bundle embedded at build time until an update is applied.
