@@ -6,7 +6,7 @@ The beta runs for about **2 weeks**. Please use it on your trips and walks, and 
 ## Install
 
 ### Android
-1. Open this link on your phone: **<APK_LINK>**
+1. Open this link on your phone: (Android link sent to you privately) (about 145 MB, so use Wi-Fi)
 2. Download the file and tap it. If Android asks, allow installing apps from your browser, then tap **Install**.
 
 ### iPhone (via the free Expo Go app)
