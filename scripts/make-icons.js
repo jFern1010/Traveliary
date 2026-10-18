@@ -123,3 +123,31 @@ if (previewDir) {
   }
   writePng(path.join(previewDir, 'preview-android.png'), 512, androidPreview);
 }
+
+// Android notification icon: Android draws only the alpha channel, so a white map-pin silhouette
+// (with a lens-shaped hole) on transparency. 96 px is the xxxhdpi size.
+function notificationIcon(size) {
+  const out = Buffer.alloc(size * size * 4);
+  const SS = 4;
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      let hits = 0;
+      for (let sy = 0; sy < SS; sy++) {
+        for (let sx = 0; sx < SS; sx++) {
+          const u = ((x + (sx + 0.5) / SS) / size) * 100; // 0–100 design space
+          const v = ((y + (sy + 0.5) / SS) / size) * 100;
+          const dx = u - 50, dy = v - 40;
+          const head = dx * dx + dy * dy <= 30 * 30;
+          const tail = v >= 52 && v <= 94 && Math.abs(dx) <= 24 * (1 - (v - 52) / 42);
+          const hole = dx * dx + dy * dy <= 12 * 12;
+          if ((head || tail) && !hole) hits++;
+        }
+      }
+      const i = (y * size + x) * 4;
+      out[i] = 255; out[i + 1] = 255; out[i + 2] = 255;
+      out[i + 3] = Math.round((hits / (SS * SS)) * 255);
+    }
+  }
+  return out;
+}
+writePng(path.join(assetsDir, 'notification-icon.png'), 96, notificationIcon(96));

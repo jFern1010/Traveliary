@@ -16,6 +16,7 @@ describe('buildMessages', () => {
       to: 'ExponentPushToken[a]',
       title: 'New photo in Zermatt',
       data: { placeId: 'p1' },
+      channelId: 'new-photos',
     });
   });
 });

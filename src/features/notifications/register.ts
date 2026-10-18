@@ -22,8 +22,20 @@ export function configureNotificationHandler() {
   });
 }
 
+/** Android channel for "New photo in <place>" pushes (must exist before asking permission on Android 13+). */
+export const NEW_PHOTOS_CHANNEL_ID = 'new-photos';
+
+async function ensureAndroidChannel() {
+  if (process.env.EXPO_OS !== 'android') return;
+  await Notifications.setNotificationChannelAsync(NEW_PHOTOS_CHANNEL_ID, {
+    name: 'New photos at your places',
+    importance: Notifications.AndroidImportance.DEFAULT,
+  });
+}
+
 export async function registerForPushToken(): Promise<PushRegistration> {
-  if (!Device.isDevice) {
+  // The iOS Simulator cannot receive remote pushes; Android emulators with Google Play can.
+  if (!Device.isDevice && process.env.EXPO_OS === 'ios') {
     return { status: 'unsupported', reason: 'Push notifications need a physical device.' };
   }
 
@@ -36,6 +48,7 @@ export async function registerForPushToken(): Promise<PushRegistration> {
   }
 
   try {
+    await ensureAndroidChannel();
     const existing = await Notifications.getPermissionsAsync();
     const permission = existing.granted ? existing : await Notifications.requestPermissionsAsync();
     if (!permission.granted) {

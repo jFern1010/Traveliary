@@ -7,8 +7,13 @@ export type ExpoMessage = {
   title: string;
   body: string;
   sound: 'default';
+  /** Android notification channel created by the app (ignored on iOS). */
+  channelId: string;
   data: { placeId: string };
 };
+
+/** Must match NEW_PHOTOS_CHANNEL_ID in src/features/notifications/register.ts. */
+export const ANDROID_CHANNEL_ID = 'new-photos';
 
 /** Expo's push API accepts at most 100 messages per request. */
 export const EXPO_BATCH_SIZE = 100;
@@ -19,6 +24,7 @@ export function buildMessages(recipients: Recipient[]): ExpoMessage[] {
     title: `New photo in ${r.place_name}`,
     body: 'A traveler just posted at a place you’ve been. Tap to see it.',
     sound: 'default',
+    channelId: ANDROID_CHANNEL_ID,
     data: { placeId: r.place_id },
   }));
 }
