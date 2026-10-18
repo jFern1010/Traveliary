@@ -120,3 +120,14 @@ Before a milestone is called done, run `npm run typecheck && npm run lint && npm
   - `production`: store builds, channel `production`, EAS env `production`.
 - **Runtime version:** builds use `appVersion`. Expo Go updates use `exposdk:57.0.0` via `EXPO_GO_UPDATE=1` (see `app.config.js`).
 - **App Store settings:** `ITSAppUsesNonExemptEncryption: false` (no export-compliance prompt). `supportsTablet: false` (iPhone only, so no iPad screenshots are needed).
+
+## Android (beta B3)
+- **Push:** Firebase project `traveliary-b4e64`. `google-services.json` is committed (public identifiers only). The FCM V1 service account key is uploaded to EAS credentials, never committed (`*firebase-adminsdk*.json` is gitignored).
+  - Pushes use the Android channel `new-photos`, created in `register.ts` and named in `messages.ts`. Keep both names in sync.
+- **Maps:** the Google Maps key is the EAS env var `GOOGLE_MAPS_ANDROID_API_KEY` (sensitive; preview + production), injected by `app.config.js`.
+  - It's restricted to `com.lyf.traveliary`, the EAS keystore SHA-1, and Maps SDK for Android only.
+  - Adding the Play Store app-signing SHA-1 is required when publishing to Play.
+  - The Google Cloud project has billing (Blaze) with a budget alert.
+- **Icons:** always use `<Icon name=…>` (`src/components/icon.tsx`). Plain SF Symbol names render nothing on Android.
+- **Android limits:** alerts show at most 3 buttons (use `OptionSheet`). Tab screens without a header need `insets.top` on Android (no `contentInsetAdjustmentBehavior`).
+- **Build an APK:** `npx eas-cli@latest build --platform android --profile preview`. Installed APKs receive JS-only fixes via `eas update --channel preview --environment preview`.
