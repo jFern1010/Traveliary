@@ -131,3 +131,12 @@ Before a milestone is called done, run `npm run typecheck && npm run lint && npm
 - **Icons:** always use `<Icon name=…>` (`src/components/icon.tsx`). Plain SF Symbol names render nothing on Android.
 - **Android limits:** alerts show at most 3 buttons (use `OptionSheet`). Tab screens without a header need `insets.top` on Android (no `contentInsetAdjustmentBehavior`).
 - **Build an APK:** `npx eas-cli@latest build --platform android --profile preview`. Installed APKs receive JS-only fixes via `eas update --channel preview --environment preview`.
+
+## Supabase projects (beta B4)
+| Project | Ref | Used by |
+|---|---|---|
+| test | `uigltnpigjgpvlwakwnw` | local `npm start` (`.env.local`), developer tools, experiments |
+| **prod** | `nxsckznbmcmhlxsxxwsn` | beta testers: EAS env `preview` + `production` → APK (channel `preview`) and Expo Go (channel `expo-go`) |
+
+- **Linked project:** the Supabase CLI applies to whichever project is linked (`npx supabase@latest link --project-ref <ref>`). Every migration and function deploy must be applied to **both** projects. Check the linked ref before `db push`.
+- **Separate secrets:** each project has its own `WEBHOOK_SECRET` function secret and Vault secrets (`notify_new_photo_url`, `notify_new_photo_secret`).
