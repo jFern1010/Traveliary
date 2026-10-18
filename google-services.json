@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "844225148266",
+    "project_id": "traveliary-b4e64",
+    "storage_bucket": "traveliary-b4e64.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:844225148266:android:faef94f359d0b27ecee113",
+        "android_client_info": {
+          "package_name": "com.lyf.traveliary"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC8mKo_z0jhpkYdD1eXJDT0uKIcDs8mA9o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

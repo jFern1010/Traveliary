@@ -41,3 +41,6 @@ example
 # generated native folders
 /ios
 /android
+
+# Firebase service account keys are secrets (upload them to EAS instead)
+*firebase-adminsdk*.json
