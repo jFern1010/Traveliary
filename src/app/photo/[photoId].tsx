@@ -1,8 +1,10 @@
 import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
+import { useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, View } from 'react-native';
 
 import { Icon } from '@/components/icon';
+import { OptionSheet } from '@/components/option-sheet';
 import { PrimaryButton } from '@/components/primary-button';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -18,6 +20,7 @@ export default function PhotoScreen() {
   const deletePhoto = useDeleteMyPhoto();
   const reportPhoto = useReportPhoto();
   const blockAuthor = useBlockAuthor();
+  const [reportSheetOpen, setReportSheetOpen] = useState(false);
 
   if (photo.isPending && photo.fetchStatus === 'paused') {
     return (
@@ -63,25 +66,21 @@ export default function PhotoScreen() {
     ]);
   }
 
-  function chooseReportReason() {
-    Alert.alert('Report this photo', 'Why should it be removed?', [
-      ...REPORT_REASONS.map((r) => ({
-        text: r.label,
-        onPress: () =>
-          reportPhoto.mutate(
-            { photoId: p.id, reason: r.value },
-            {
-              onSuccess: (outcome) =>
-                Alert.alert('Reported', reportOutcomeMessage(outcome), [
-                  { text: 'OK', onPress: () => router.back() },
-                ]),
-              onError: (e) => Alert.alert('Couldn’t report', e.message),
-            },
-          ),
-      })),
-      { text: 'Cancel', style: 'cancel' },
-    ]);
-  }
+  // A sheet rather than an Alert: Android alerts show at most three buttons.
+  const reportOptions = REPORT_REASONS.map((r) => ({
+    label: r.label,
+    onPress: () =>
+      reportPhoto.mutate(
+        { photoId: p.id, reason: r.value },
+        {
+          onSuccess: (outcome) =>
+            Alert.alert('Reported', reportOutcomeMessage(outcome), [
+              { text: 'OK', onPress: () => router.back() },
+            ]),
+          onError: (e) => Alert.alert('Couldn’t report', e.message),
+        },
+      ),
+  }));
 
   function confirmBlock() {
     Alert.alert(
@@ -160,7 +159,7 @@ export default function PhotoScreen() {
               <PrimaryButton
                 label="Report photo"
                 variant="secondary"
-                onPress={chooseReportReason}
+                onPress={() => setReportSheetOpen(true)}
                 loading={reportPhoto.isPending}
               />
               <PrimaryButton
@@ -184,6 +183,13 @@ export default function PhotoScreen() {
           )}
         </View>
       </ScrollView>
+      <OptionSheet
+        visible={reportSheetOpen}
+        title="Report this photo"
+        message="Why should it be removed?"
+        options={reportOptions}
+        onClose={() => setReportSheetOpen(false)}
+      />
     </ThemedView>
   );
 }

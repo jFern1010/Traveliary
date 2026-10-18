@@ -1,5 +1,6 @@
-import { router } from 'expo-router';
-import { ScrollView, View } from 'react-native';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback } from 'react';
+import { BackHandler, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Icon, type IconName } from '@/components/icon';
@@ -38,6 +39,14 @@ function openLegal(doc: 'terms' | 'privacy') {
 
 export default function OnboardingScreen() {
   const insets = useSafeAreaInsets();
+
+  // Android back button: agreeing is required, so don't let it dismiss this screen.
+  useFocusEffect(
+    useCallback(() => {
+      const sub = BackHandler.addEventListener('hardwareBackPress', () => true);
+      return () => sub.remove();
+    }, []),
+  );
 
   async function start() {
     await acceptCurrentTerms();

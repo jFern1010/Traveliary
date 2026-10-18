@@ -1,6 +1,7 @@
 import { Link, router } from 'expo-router';
 import type { ReactNode } from 'react';
 import { ActivityIndicator, Alert, FlatList, Pressable, RefreshControl, View, useWindowDimensions } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Icon } from '@/components/icon';
 import { OfflineBanner } from '@/components/offline-banner';
@@ -22,6 +23,9 @@ export default function MyTripsScreen() {
   const deletePhoto = useDeleteMyPhoto();
   const { width } = useWindowDimensions();
   const tile = gridTileSize(width, COLUMNS, Spacing.three, GAP);
+  const insets = useSafeAreaInsets();
+  // iOS insets the list automatically (contentInsetAdjustmentBehavior); Android draws edge-to-edge.
+  const topInset = process.env.EXPO_OS === 'android' ? insets.top : 0;
 
   function confirmDelete(photo: Photo) {
     Alert.alert('Delete this photo?', `It will be removed from ${photo.placeName} for everyone.`, [
@@ -56,7 +60,7 @@ export default function MyTripsScreen() {
           <RefreshControl refreshing={photos.isRefetching} onRefresh={() => photos.refetch()} />
         }
         ListHeaderComponent={
-          <View style={{ paddingTop: Spacing.three, paddingBottom: Spacing.three, gap: Spacing.one }}>
+          <View style={{ paddingTop: topInset + Spacing.three, paddingBottom: Spacing.three, gap: Spacing.one }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
               <ThemedText type="subtitle">My Trips</ThemedText>
               <Pressable
