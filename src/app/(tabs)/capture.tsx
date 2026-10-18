@@ -113,7 +113,7 @@ function LiveCamera() {
         <View style={{ width: 52 }} />
         <ShutterButton onPress={takePhoto} disabled={!ready || capturing} />
         <CameraIconButton
-          icon="arrow.triangle.2.circlepath"
+          icon="switchCamera"
           label="Switch camera"
           onPress={() => setFacing((f) => (f === 'back' ? 'front' : 'back'))}
         />

@@ -1,8 +1,8 @@
 import { Link, router } from 'expo-router';
 import type { ReactNode } from 'react';
-import { SymbolView } from 'expo-symbols';
 import { ActivityIndicator, Alert, FlatList, Pressable, RefreshControl, View, useWindowDimensions } from 'react-native';
 
+import { Icon } from '@/components/icon';
 import { OfflineBanner } from '@/components/offline-banner';
 import { gridTileSize, PhotoTile } from '@/components/photo-tile';
 import { PrimaryButton } from '@/components/primary-button';
@@ -64,7 +64,7 @@ export default function MyTripsScreen() {
                 hitSlop={12}
                 accessibilityRole="button"
                 accessibilityLabel="About, feedback, privacy and your data">
-                <SymbolView name="info.circle" tintColor={BrandColor} size={26} />
+                <Icon name="info" color={BrandColor} size={26} />
               </Pressable>
             </View>
             {count > 0 && (

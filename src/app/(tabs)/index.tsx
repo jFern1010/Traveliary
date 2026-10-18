@@ -119,7 +119,7 @@ function PlacesMap({ position, showsUser }: { position: Position | null; showsUs
           gap: Spacing.two,
         }}>
         {places.isFetching && <ActivityIndicator />}
-        {position && <CameraIconButton icon="location.fill" label="Show my location" onPress={recenter} />}
+        {position && <CameraIconButton icon="myLocation" label="Show my location" onPress={recenter} />}
       </View>
     </View>
   );

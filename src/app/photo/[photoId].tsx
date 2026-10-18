@@ -1,8 +1,8 @@
 import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
-import { SymbolView } from 'expo-symbols';
 import { ActivityIndicator, Alert, Pressable, ScrollView, View } from 'react-native';
 
+import { Icon } from '@/components/icon';
 import { PrimaryButton } from '@/components/primary-button';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -125,7 +125,7 @@ export default function PhotoScreen() {
             }
             accessibilityRole={from === 'place' ? undefined : 'link'}
             style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.two }}>
-            <SymbolView name="mappin.and.ellipse" tintColor={BrandColor} size={22} />
+            <Icon name="mapPin" color={BrandColor} size={22} />
             <View style={{ flex: 1 }}>
               <ThemedText type="smallBold" style={{ fontSize: 18 }}>
                 {p.placeName}
@@ -136,7 +136,7 @@ export default function PhotoScreen() {
                 </ThemedText>
               )}
             </View>
-            {from !== 'place' && <SymbolView name="chevron.right" tintColor="gray" size={14} />}
+            {from !== 'place' && <Icon name="chevronRight" color="gray" size={14} />}
           </Pressable>
 
           <ThemedText type="small" themeColor="textSecondary">
@@ -148,7 +148,7 @@ export default function PhotoScreen() {
             <ThemedView
               type="backgroundElement"
               style={{ flexDirection: 'row', gap: Spacing.two, padding: Spacing.three, borderRadius: 12 }}>
-              <SymbolView name="eye.slash" tintColor="#E5484D" size={18} />
+              <Icon name="hidden" color="#E5484D" size={18} />
               <ThemedText type="small" style={{ flex: 1 }}>
                 Hidden: several travelers reported this photo, so only you can see it.
               </ThemedText>

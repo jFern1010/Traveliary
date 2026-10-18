@@ -1,10 +1,10 @@
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
-import { SymbolView } from 'expo-symbols';
 import { useState } from 'react';
 import { ActivityIndicator, Alert, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { Icon } from '@/components/icon';
 import { PrimaryButton } from '@/components/primary-button';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -81,7 +81,7 @@ export default function PreviewScreen() {
         <LocationCard state={location} />
 
         <View style={{ flexDirection: 'row', gap: Spacing.two, alignItems: 'flex-start' }}>
-          <SymbolView name="globe" tintColor="gray" size={18} />
+          <Icon name="globe" color="gray" size={18} />
           <ThemedText type="small" themeColor="textSecondary" style={{ flex: 1 }}>
             Posts are visible to everyone on Traveliary. Only the place name is shown, never your
             exact position.
@@ -141,9 +141,9 @@ function LocationCard({ state }: { state: PromiseState<CaptureLocation> }) {
       {state.status === 'pending' ? (
         <ActivityIndicator />
       ) : (
-        <SymbolView
-          name={state.status === 'rejected' ? 'location.slash.fill' : 'mappin.and.ellipse'}
-          tintColor={state.status === 'rejected' ? '#E5484D' : BrandColor}
+        <Icon
+          name={state.status === 'rejected' ? 'locationOff' : 'mapPin'}
+          color={state.status === 'rejected' ? '#E5484D' : BrandColor}
           size={26}
         />
       )}

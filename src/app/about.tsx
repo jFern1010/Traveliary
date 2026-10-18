@@ -1,10 +1,10 @@
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
-import { SymbolView, type SFSymbol } from 'expo-symbols';
 import * as Updates from 'expo-updates';
 import { useState, type ReactNode } from 'react';
 import { ActivityIndicator, Alert, Linking, Pressable, ScrollView, View } from 'react-native';
 
+import { Icon, type IconName } from '@/components/icon';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { APP_NAME, SUPPORT_EMAIL } from '@/constants/app-info';
@@ -79,14 +79,14 @@ export default function AboutScreen() {
         contentInsetAdjustmentBehavior="automatic"
         contentContainerStyle={{ padding: Spacing.three, gap: Spacing.four, paddingBottom: Spacing.six }}>
         <Group title="Help">
-          <Row icon="envelope" label="Send feedback" detail={SUPPORT_EMAIL} onPress={sendFeedback} />
+          <Row icon="mail" label="Send feedback" detail={SUPPORT_EMAIL} onPress={sendFeedback} />
           <Row
-            icon="doc.text"
+            icon="document"
             label="Terms of Use"
             onPress={() => router.push({ pathname: '/legal/[doc]', params: { doc: 'terms' } })}
           />
           <Row
-            icon="hand.raised"
+            icon="privacy"
             label="Privacy Policy"
             onPress={() => router.push({ pathname: '/legal/[doc]', params: { doc: 'privacy' } })}
           />
@@ -94,7 +94,7 @@ export default function AboutScreen() {
 
         <Group title="Safety">
           <Row
-            icon="person.crop.circle.badge.xmark"
+            icon="blocked"
             label="Blocked travelers"
             detail={blocks.isPending ? '…' : String(blockCount)}
             actionLabel={blockCount > 0 ? 'Unblock all' : undefined}
@@ -142,7 +142,7 @@ function Row({
   busy,
   onPress,
 }: {
-  icon: SFSymbol;
+  icon: IconName;
   label: string;
   detail?: string;
   actionLabel?: string;
@@ -167,7 +167,7 @@ function Row({
       {busy ? (
         <ActivityIndicator />
       ) : (
-        <SymbolView name={icon} tintColor={tint ?? BrandColor} size={20} />
+        <Icon name={icon} color={tint ?? BrandColor} size={20} />
       )}
       <ThemedText style={{ flex: 1, color: tint ?? theme.text }}>{label}</ThemedText>
       {detail && (

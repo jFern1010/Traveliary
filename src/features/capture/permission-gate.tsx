@@ -1,6 +1,6 @@
-import { SymbolView } from 'expo-symbols';
 import { Linking, ScrollView, View } from 'react-native';
 
+import { Icon } from '@/components/icon';
 import { PrimaryButton } from '@/components/primary-button';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -19,11 +19,7 @@ function Reason({ granted, title, body }: { granted: boolean; title: string; bod
     <ThemedView
       type="backgroundElement"
       style={{ flexDirection: 'row', gap: Spacing.three, padding: Spacing.three, borderRadius: 14 }}>
-      <SymbolView
-        name={granted ? 'checkmark.circle.fill' : 'circle'}
-        tintColor={granted ? '#30A46C' : BrandColor}
-        size={24}
-      />
+      <Icon name={granted ? 'checked' : 'unchecked'} color={granted ? '#30A46C' : BrandColor} size={24} />
       <View style={{ flex: 1, gap: Spacing.half }}>
         <ThemedText type="smallBold">{title}</ThemedText>
         <ThemedText type="small" themeColor="textSecondary">
@@ -48,7 +44,7 @@ export function PermissionGate({ state, cameraGranted, locationGranted, onReques
           paddingBottom: BottomTabInset + Spacing.four,
         }}>
         <View style={{ alignItems: 'center', gap: Spacing.two }}>
-          <SymbolView name="camera.viewfinder" tintColor={BrandColor} size={56} />
+          <Icon name="viewfinder" color={BrandColor} size={56} />
           <ThemedText type="subtitle" style={{ textAlign: 'center' }}>
             Capture where you are
           </ThemedText>

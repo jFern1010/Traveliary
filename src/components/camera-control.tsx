@@ -1,7 +1,8 @@
 import { GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
-import { SymbolView, type SFSymbol } from 'expo-symbols';
 import type { ReactNode } from 'react';
 import { Pressable, View, type ViewStyle } from 'react-native';
+
+import { Icon, type IconName } from '@/components/icon';
 
 /** Liquid glass on iOS 26+, a translucent dark disc on older iOS. */
 function GlassSurface({ style, children }: { style: ViewStyle; children: ReactNode }) {
@@ -20,7 +21,7 @@ export function CameraIconButton({
   label,
   onPress,
 }: {
-  icon: SFSymbol;
+  icon: IconName;
   label: string;
   onPress: () => void;
 }) {
@@ -32,7 +33,7 @@ export function CameraIconButton({
         accessibilityLabel={label}
         hitSlop={8}
         style={{ width: 52, height: 52, alignItems: 'center', justifyContent: 'center' }}>
-        <SymbolView name={icon} tintColor="white" size={24} />
+        <Icon name={icon} color="white" size={24} />
       </Pressable>
     </GlassSurface>
   );

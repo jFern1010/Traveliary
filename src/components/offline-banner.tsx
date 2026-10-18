@@ -1,6 +1,6 @@
-import { SymbolView } from 'expo-symbols';
 import { View, type ViewStyle } from 'react-native';
 
+import { Icon } from '@/components/icon';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
 import { useIsOnline } from '@/lib/connectivity';
@@ -25,7 +25,7 @@ export function OfflineBanner({ style }: { style?: ViewStyle }) {
         },
         style,
       ]}>
-      <SymbolView name="wifi.slash" tintColor="white" size={16} />
+      <Icon name="offline" color="white" size={16} />
       <ThemedText type="small" style={{ color: 'white', flex: 1 }}>
         You’re offline. Showing saved places and photos.
       </ThemedText>

@@ -1,32 +1,32 @@
 import { router } from 'expo-router';
-import { SymbolView, type SFSymbol } from 'expo-symbols';
 import { ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { Icon, type IconName } from '@/components/icon';
 import { PrimaryButton } from '@/components/primary-button';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { BrandColor, Spacing } from '@/constants/theme';
 import { acceptCurrentTerms } from '@/features/onboarding/storage';
 
-const POINTS: { icon: SFSymbol; title: string; body: string }[] = [
+const POINTS: { icon: IconName; title: string; body: string }[] = [
   {
-    icon: 'camera.fill',
+    icon: 'camera',
     title: 'Snap where you are',
     body: 'Take a photo or selfie in the app. It’s tagged with the place, like Zermatt, Switzerland.',
   },
   {
-    icon: 'globe.europe.africa.fill',
+    icon: 'world',
     title: 'Posts are public',
     body: 'Everyone can see your photo at that place. Nothing is posted until you tap “Post publicly”.',
   },
   {
-    icon: 'lock.fill',
+    icon: 'lock',
     title: 'Your exact spot stays private',
     body: 'Others see the place name only, never your exact position. No account or profile needed.',
   },
   {
-    icon: 'hand.raised.fill',
+    icon: 'kind',
     title: 'Be kind',
     body: 'Respect people in your shots. Anyone can report a photo; reported photos are hidden.',
   },
@@ -64,7 +64,7 @@ export default function OnboardingScreen() {
 
         {POINTS.map((point) => (
           <View key={point.title} style={{ flexDirection: 'row', gap: Spacing.three }}>
-            <SymbolView name={point.icon} tintColor={BrandColor} size={28} />
+            <Icon name={point.icon} color={BrandColor} size={28} />
             <View style={{ flex: 1, gap: Spacing.half }}>
               <ThemedText type="smallBold" style={{ fontSize: 17 }}>
                 {point.title}

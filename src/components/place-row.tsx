@@ -1,7 +1,7 @@
 import { Image } from 'expo-image';
-import { SymbolView } from 'expo-symbols';
 import { Pressable, View } from 'react-native';
 
+import { Icon } from '@/components/icon';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
@@ -51,7 +51,7 @@ export function PlaceRow({ place, onPress }: { place: PlaceSummary; onPress: () 
               justifyContent: 'center',
               backgroundColor: theme.backgroundSelected,
             }}>
-            <SymbolView name="photo" tintColor={theme.textSecondary} size={24} />
+            <Icon name="photo" color={theme.textSecondary} size={24} />
           </View>
         )}
         <View style={{ flex: 1, gap: Spacing.half }}>
@@ -67,7 +67,7 @@ export function PlaceRow({ place, onPress }: { place: PlaceSummary; onPress: () 
             {meta}
           </ThemedText>
         </View>
-        <SymbolView name="chevron.right" tintColor={theme.textSecondary} size={14} />
+        <Icon name="chevronRight" color={theme.textSecondary} size={14} />
       </ThemedView>
     </Pressable>
   );
