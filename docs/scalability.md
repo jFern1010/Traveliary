@@ -1,6 +1,6 @@
 # Scalability review
 
-## Fix before the beta (milestone SC)
+## Fixed before the beta (milestone SC, migrations 20261020000000 + 20261021000000)
 | # | Problem | Fix |
 |---|---|---|
 | 1 | `create_photo` takes one **global** advisory lock, so every post worldwide is serialized | Lock per ~1 km cell (only posts at the same spot wait for each other) |
