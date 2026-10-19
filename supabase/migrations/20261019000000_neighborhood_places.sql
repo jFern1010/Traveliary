@@ -4,7 +4,7 @@
 -- place's pin stayed at the first photo's exact position (which also revealed that position).
 -- Now:
 --   * the app names places by district when the phone knows one ("Grünerløkka" in Oslo);
---   * matching: same name within 5 km, otherwise any place within 300 m, otherwise a new place;
+--   * matching: same name nearby (5 km here; 1 km since 20261019010000), otherwise any place within 300 m;
 --   * a place's pin is the average position of its visible photos, snapped to a ~250 m grid,
 --     so it sits near where photos are taken without revealing anyone's exact position.
 
