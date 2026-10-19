@@ -150,3 +150,12 @@ Before a milestone is called done, run `npm run typecheck && npm run lint && npm
      - `npx eas-cli@latest update --channel preview --platform android --environment preview --message "…"`
      - `EXPO_GO_UPDATE=1 npx eas-cli@latest update --channel expo-go --platform ios --environment preview --message "…"`
 - **Rebuild the APK** (instead of only updating) when native code, config, or **EAS env values** change. A fresh install runs the bundle embedded at build time until an update is applied.
+
+## Scalability rules (apply to every change)
+- **Queries:** every list or map query is bounded (`limit`) and paged where it can grow. Never return unbounded rows.
+- **Indexes:** every filter or join used by an RPC or view has an index. Spatial filters use GiST indexes (`st_dwithin` / bounding boxes on geography or geometry), never unindexed lat/lng math.
+- **Locks:** no global locks or serialization. Lock only the smallest scope needed (e.g. per area cell).
+- **Per-viewer work:** keep it cheap. Use stored aggregates (`places.photo_count`) and only recompute per viewer when needed (e.g. when the viewer has blocks).
+- **External APIs** (Wikidata, Expo Push, geocoding) are cached or batched, and never called once per user action in a way that grows with users.
+- **Images:** always serve thumbnails in lists. Full images only in the viewer.
+- **Free-tier ceilings:** Supabase storage, egress and MAU; EAS Update MAU. These are the first limits; plan the paid upgrade before hitting them. See `docs/scalability.md`.
