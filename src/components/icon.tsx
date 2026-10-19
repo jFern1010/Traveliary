@@ -28,6 +28,10 @@ const ICONS = {
   lock: { ios: 'lock.fill', android: 'lock' },
   blocked: { ios: 'person.crop.circle.badge.xmark', android: 'person_off' },
   trash: { ios: 'trash', android: 'delete' },
+  star: { ios: 'star.fill', android: 'star' },
+  directions: { ios: 'arrow.triangle.turn.up.right.diamond.fill', android: 'directions' },
+  article: { ios: 'book', android: 'menu_book' },
+  openExternal: { ios: 'arrow.up.right.square', android: 'open_in_new' },
 } as const satisfies Record<string, { ios: SFSymbol; android: AndroidSymbol }>;
 
 export type IconName = keyof typeof ICONS;

@@ -24,7 +24,7 @@ export type Photo = {
 /** One page of a place gallery; pass `nextCursor` back to load older photos. */
 export type PhotoPage = { photos: Photo[]; nextCursor: string | null };
 
-type PhotoPublicRow = {
+export type PhotoPublicRow = {
   id: string;
   place_id: string;
   place_name: string;
@@ -45,7 +45,7 @@ function publicUrl(path: string): string {
   return supabase.storage.from(PHOTO_BUCKET).getPublicUrl(path).data.publicUrl;
 }
 
-function toPhoto(row: PhotoPublicRow): Photo {
+export function toPhoto(row: PhotoPublicRow): Photo {
   return {
     id: row.id,
     placeId: row.place_id,

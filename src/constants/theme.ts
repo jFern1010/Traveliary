@@ -26,6 +26,8 @@ export const Colors = {
 
 /** Traveliary accent (buttons, links). Same in light and dark mode. */
 export const BrandColor = '#208AEF';
+/** "Must see" sights (map pins, accents): distinct from the blue Traveliary places. */
+export const SightColor = '#F08C00';
 
 export type ThemeColor =keyof typeof Colors.light & keyof typeof Colors.dark;
 
