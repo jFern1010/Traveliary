@@ -7,7 +7,15 @@
 
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
-import { buildQuery, cellFor, sanitizeLang, wikiSite, parseResults, type Sight } from './sights.ts';
+import {
+  buildQuery,
+  cellFor,
+  EXCLUDED_SIGHTS,
+  parseResults,
+  sanitizeLang,
+  wikiSite,
+  type Sight,
+} from './sights.ts';
 
 const USER_AGENT = 'Traveliary/0.9 (https://expo.dev/@jferns-team/traveliary; jonnelbfernandez@gmail.com)';
 const WIKIDATA_TTL_DAYS = 30;
@@ -129,6 +137,9 @@ Deno.serve(async (req) => {
       if (error) console.error('cache write failed', error);
     }
   }
+
+  // Exclusions also apply to results cached before an ID was added to the list.
+  sights = sights.filter((s) => !EXCLUDED_SIGHTS.has(s.id));
 
   // 2. Live Traveliary activity per sight (photos within 300 m).
   const counts = new Map<string, number>();

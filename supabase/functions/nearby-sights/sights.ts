@@ -42,6 +42,14 @@ export function wikiSite(lang: string): string {
   return lang === 'nb' ? 'no' : lang;
 }
 
+/**
+ * Places never suggested as "must see", e.g. memorial sites known mainly for a tragedy.
+ * Add Wikidata IDs here when testers or moderation flag a suggestion as inappropriate.
+ */
+export const EXCLUDED_SIGHTS = new Set<string>([
+  'Q106357', // Utøya: site of the 22 July 2011 attacks
+]);
+
 // What counts as a sight. Instance-of (P31) types kept, and types dropped even if heritage-listed.
 // Direct P31 checks only: subclass (P279*) traversal made the query take ~50 s.
 const KEEP_TYPES = [
@@ -143,7 +151,7 @@ export function parseResults(json: unknown, lang: string): Sight[] {
     const point = parsePoint(b.c?.value);
     const name = b.itemLabel?.value;
     // Unlabelled items come back as their QID: useless to show.
-    if (!id || !point || !name || /^Q\d+$/.test(name)) continue;
+    if (!id || !point || !name || /^Q\d+$/.test(name) || EXCLUDED_SIGHTS.has(id)) continue;
     const localTitle = b.lt?.value ?? null;
     const enTitle = b.et?.value ?? null;
     sights.push({

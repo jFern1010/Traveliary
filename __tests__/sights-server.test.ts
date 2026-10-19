@@ -83,6 +83,16 @@ describe('parseResults', () => {
     });
   });
 
+  it('drops excluded places such as memorial sites', () => {
+    const utoya = {
+      item: { value: 'http://www.wikidata.org/entity/Q106357' },
+      itemLabel: { value: 'Utøya' },
+      sitelinks: { value: '59' },
+      c: { value: 'Point(10.23 60.02)' },
+    };
+    expect(parseResults({ results: { bindings: [utoya] } }, 'en')).toEqual([]);
+  });
+
   it('survives malformed responses', () => {
     expect(parseResults(null, 'en')).toEqual([]);
     expect(parseResults({ error: 'timeout' }, 'en')).toEqual([]);
