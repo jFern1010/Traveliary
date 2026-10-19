@@ -34,6 +34,23 @@ describe('suggestPlace', () => {
     });
   });
 
+  it('uses the district inside a city, so a big city is not one single place', () => {
+    const place = suggestPlace({
+      ...empty,
+      city: 'Oslo',
+      district: 'Grünerløkka',
+      region: 'Oslo',
+      country: 'Norway',
+      isoCountryCode: 'NO',
+    });
+    expect(place).toMatchObject({ name: 'Grünerløkka', locality: 'Oslo', countryCode: 'NO' });
+    expect(formatPlaceLabel(place!)).toBe('Grünerløkka, Oslo');
+  });
+
+  it('ignores a district that just repeats the city name', () => {
+    expect(suggestPlace({ ...empty, city: 'Zermatt', district: 'Zermatt' })?.name).toBe('Zermatt');
+  });
+
   it('falls back to district, then subregion, when there is no city', () => {
     expect(suggestPlace({ ...empty, district: 'Shibuya', country: 'Japan' })?.name).toBe('Shibuya');
     expect(suggestPlace({ ...empty, subregion: 'Visp', country: 'Switzerland' })?.name).toBe(

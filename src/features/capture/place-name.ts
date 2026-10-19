@@ -25,16 +25,20 @@ function clean(value: string | null | undefined): string | null {
 
 /**
  * Picks the most "place-like" name from a reverse-geocoded address.
- * Town or city first (Zermatt), then broader areas for remote spots (a national park's district or region).
- * Returns null when the address holds nothing usable, e.g. in the middle of the ocean.
+ * In a city with districts, the district is the place ("Grünerløkka" in Oslo), so one big city
+ * doesn't collapse into a single place. Otherwise the town (Zermatt), then broader areas for
+ * remote spots. Returns null when the address holds nothing usable, e.g. in the middle of the ocean.
  */
 export function suggestPlace(address: GeocodedAddress | null | undefined): SuggestedPlace | null {
   if (!address) return null;
 
-  const locality = clean(address.city) ?? clean(address.district) ?? clean(address.subregion);
+  const city = clean(address.city);
+  const district = clean(address.district);
+  const locality = city ?? district ?? clean(address.subregion);
   const region = clean(address.region);
   const country = clean(address.country);
-  const name = locality ?? region ?? clean(address.name) ?? country;
+  const cityDistrict = city && district && district !== city ? district : null;
+  const name = cityDistrict ?? locality ?? region ?? clean(address.name) ?? country;
   if (!name) return null;
 
   return {
@@ -46,8 +50,12 @@ export function suggestPlace(address: GeocodedAddress | null | undefined): Sugge
   };
 }
 
-/** "Zermatt, Switzerland". Avoids repeating the name when it is the country itself. */
+/**
+ * "Grünerløkka, Oslo" for a city district, otherwise "Zermatt, Switzerland".
+ * Avoids repeating the name when it is the city or country itself.
+ */
 export function formatPlaceLabel(place: SuggestedPlace): string {
+  if (place.locality && place.locality !== place.name) return `${place.name}, ${place.locality}`;
   if (!place.country || place.country === place.name) return place.name;
   return `${place.name}, ${place.country}`;
 }
