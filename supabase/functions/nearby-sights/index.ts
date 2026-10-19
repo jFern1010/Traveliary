@@ -10,6 +10,7 @@ import { createClient } from 'npm:@supabase/supabase-js@2';
 import {
   buildQuery,
   cellFor,
+  QUERY_RADIUS_KM,
   EXCLUDED_SIGHTS,
   parseResults,
   sanitizeLang,
@@ -20,7 +21,14 @@ import {
 const USER_AGENT = 'Traveliary/0.9 (https://expo.dev/@jferns-team/traveliary; jonnelbfernandez@gmail.com)';
 const WIKIDATA_TTL_DAYS = 30;
 const FALLBACK_TTL_DAYS = 1;
-const WIKIDATA_TIMEOUT_MS = 50_000;
+/**
+ * Dense cities (e.g. Tokyo) have tens of thousands of mapped items within 58 km, and the full
+ * query can approach Wikidata's 60 s limit. Try the full radius first, then a smaller one.
+ */
+const WIKIDATA_ATTEMPTS = [
+  { radiusKm: QUERY_RADIUS_KM, timeoutMs: 30_000 },
+  { radiusKm: 20, timeoutMs: 25_000 },
+];
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -39,12 +47,17 @@ async function fetchWithTimeout(url: string, init: RequestInit, ms: number) {
   }
 }
 
-async function fromWikidata(cell: ReturnType<typeof cellFor>, lang: string): Promise<Sight[]> {
-  const url = `https://query.wikidata.org/sparql?query=${encodeURIComponent(buildQuery(cell, lang))}`;
+async function fromWikidata(
+  cell: ReturnType<typeof cellFor>,
+  lang: string,
+  radiusKm: number,
+  timeoutMs: number,
+): Promise<Sight[]> {
+  const url = `https://query.wikidata.org/sparql?query=${encodeURIComponent(buildQuery(cell, lang, radiusKm))}`;
   const res = await fetchWithTimeout(
     url,
     { headers: { Accept: 'application/sparql-results+json', 'User-Agent': USER_AGENT } },
-    WIKIDATA_TIMEOUT_MS,
+    timeoutMs,
   );
   if (!res.ok) throw new Error(`Wikidata ${res.status}`);
   return parseResults(await res.json(), lang);
@@ -111,11 +124,20 @@ Deno.serve(async (req) => {
     sights = cached.sights as Sight[];
     source = cached.source;
   } else {
-    try {
-      sights = await fromWikidata(cell, lang);
+    let wikidataSights: Sight[] | null = null;
+    for (const attempt of WIKIDATA_ATTEMPTS) {
+      try {
+        wikidataSights = await fromWikidata(cell, lang, attempt.radiusKm, attempt.timeoutMs);
+        break;
+      } catch (e) {
+        console.error(`Wikidata failed at ${attempt.radiusKm} km`, e);
+      }
+    }
+    if (wikidataSights) {
+      sights = wikidataSights;
       source = 'wikidata';
-    } catch (e) {
-      console.error('Wikidata failed, falling back to Wikipedia', e);
+    } else {
+      console.error('Wikidata unavailable, falling back to Wikipedia');
       try {
         sights = await fromWikipedia(cell, lang);
         source = 'wikipedia';
