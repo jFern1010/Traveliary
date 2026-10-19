@@ -15,6 +15,13 @@ describe('cellFor', () => {
     expect(a).toEqual({ key: '59.95,10.75', lat: 59.95, lng: 10.75 });
   });
 
+  it('is stable: a cell center maps to the same cell (the app sends centers, the server re-snaps)', () => {
+    for (const [lat, lng] of [[59.9139, 10.7522], [-33.8688, 151.2093], [35.6812, 139.7671], [10.3157, 123.8854]]) {
+      const cell = cellFor(lat, lng);
+      expect(cellFor(cell.lat, cell.lng)).toEqual(cell);
+    }
+  });
+
   it('handles negative coordinates', () => {
     expect(cellFor(-33.8688, 151.2093).key).toBe('-33.85,151.25');
   });

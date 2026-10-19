@@ -159,3 +159,16 @@ Before a milestone is called done, run `npm run typecheck && npm run lint && npm
 - **External APIs** (Wikidata, Expo Push, geocoding) are cached or batched, and never called once per user action in a way that grows with users.
 - **Images:** always serve thumbnails in lists. Full images only in the viewer.
 - **Free-tier ceilings:** Supabase storage, egress and MAU; EAS Update MAU. These are the first limits; plan the paid upgrade before hitting them. See `docs/scalability.md`.
+
+## Must see (sights)
+- **Server:**
+  - The `nearby-sights` Edge Function queries Wikidata (SPARQL) per ~11 km cell and language, cached 30 days in `sight_cache`.
+  - If the full search is slow it retries at 20 km, then falls back to Wikipedia geosearch (cached 1 day).
+  - Live traveler counts come from `traveliary_counts_near`.
+- **What counts as a sight:** `KEEP_TYPES` / `DROP_TYPES` / `EXCLUDED_SIGHTS` in `supabase/functions/nearby-sights/sights.ts`.
+  - Excluded places (e.g. Utøya) are filtered from cached results too. Redeploy the function after editing.
+- **Privacy:** the app sends only the cell center (`cellFor`), never the exact position. Ranking within 50 km happens on the phone (`src/features/sights/rank.ts`).
+- **App:** Explore → Must see list, orange pins (`SightColor`), `sight/[sightId]` detail.
+  - Directions use Apple or Google Maps URLs. Summaries come from Wikipedia's REST API.
+  - The CC BY-SA credit is required wherever sight data is shown.
+- **Deploy:** `npx supabase@latest functions deploy nearby-sights --no-verify-jwt --use-api`, to **both** projects.

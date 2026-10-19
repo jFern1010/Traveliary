@@ -65,6 +65,10 @@ export const LEGAL_CONTENT: Record<LegalDoc, LegalSection[]> = {
       body: 'Data is stored with Supabase (database and file hosting). Push notifications are delivered through Expo and Apple or Google. Place names are looked up on your phone using the phone’s built-in map services.',
     },
     {
+      heading: 'Must-see suggestions',
+      body: 'To suggest well-known places near you, the app sends a rough area (about 10 km wide, never your exact position) and your language to our server, which looks them up on Wikipedia and Wikidata. When you open a place, its summary and photo load directly from Wikipedia and Wikimedia Commons.',
+    },
+    {
       heading: 'How long we keep it',
       body: 'Until you delete it. Deleting a photo removes it and its files. “Delete my data” in the About screen permanently removes all your photos, reports, blocks, push token, and anonymous identity.',
     },

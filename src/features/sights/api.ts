@@ -1,6 +1,7 @@
 import { ensureUserId } from '@/features/auth/session';
 import { toPhoto, type Photo, type PhotoPublicRow } from '@/features/photos/api';
 import { supabase } from '@/lib/supabase';
+import { cellFor } from '../../../supabase/functions/nearby-sights/sights';
 import type { Sight } from './rank';
 
 const WIKI_USER_AGENT = 'Traveliary/0.9 (jonnelbfernandez@gmail.com)';
@@ -16,12 +17,16 @@ export function deviceLanguage(): string {
 
 export type NearbySightsResponse = { cell: string; source: 'wikidata' | 'wikipedia'; sights: Sight[] };
 
-/** Sights around a position (the server only uses its ~11 km cell). Can take up to ~30 s in a new area. */
+/**
+ * Sights around a position. Only the ~11 km cell center leaves the phone, never the exact position
+ * (the Privacy Policy promises this). Can take up to ~30 s in a new area.
+ */
 export async function fetchNearbySights(latitude: number, longitude: number, lang: string): Promise<NearbySightsResponse> {
   await ensureUserId();
+  const cell = cellFor(latitude, longitude);
   const { data, error } = await supabase.functions.invoke<NearbySightsResponse>('nearby-sights', {
     method: 'POST',
-    body: { lat: latitude, lng: longitude, lang },
+    body: { lat: cell.lat, lng: cell.lng, lang },
   });
   if (error) {
     const detail = await (error.context as Response | undefined)?.json?.().catch(() => null);
