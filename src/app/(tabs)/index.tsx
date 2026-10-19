@@ -5,22 +5,28 @@ import MapView, { Marker } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { CameraIconButton } from '@/components/camera-control';
+import { EmptyMessage } from '@/components/empty-message';
 import { OfflineBanner } from '@/components/offline-banner';
 import { PlaceRow } from '@/components/place-row';
 import { PrimaryButton } from '@/components/primary-button';
 import { SegmentedPill } from '@/components/segmented-pill';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { BottomTabInset, BrandColor, Spacing } from '@/constants/theme';
+import { BottomTabInset, BrandColor, SightColor, Spacing } from '@/constants/theme';
 import { formatPhotoCount, regionToBounds, type Bounds, type Region } from '@/features/places/geo';
 import { usePlacesInBounds, usePlacesNear } from '@/features/places/hooks';
 import { useUserPosition, type Position } from '@/features/places/use-user-position';
+import { useNearbySights } from '@/features/sights/hooks';
+import { formatKm } from '@/features/sights/links';
+import { MustSeeList, openSight } from '@/features/sights/must-see-list';
+import type { RankedSight } from '@/features/sights/rank';
 import { isBackendConfigured } from '@/lib/env';
 
-type Mode = 'map' | 'nearby';
+type Mode = 'map' | 'nearby' | 'mustSee';
 const MODES = [
   { value: 'map', label: 'Map' },
   { value: 'nearby', label: 'Nearby' },
+  { value: 'mustSee', label: 'Must see' },
 ] as const;
 
 /** Before we know where the user is: a view over Europe. */
@@ -34,14 +40,18 @@ function openPlace(placeId: string) {
 export default function ExploreScreen() {
   const [mode, setMode] = useState<Mode>('map');
   const user = useUserPosition();
+  // Loaded once for both the "Must see" list and the orange pins on the map.
+  const sights = useNearbySights(user.position);
   const insets = useSafeAreaInsets();
 
   return (
     <ThemedView style={{ flex: 1 }}>
       {mode === 'map' ? (
-        <PlacesMap position={user.position} showsUser={user.granted} />
-      ) : (
+        <PlacesMap position={user.position} showsUser={user.granted} sights={sights.ranked} />
+      ) : mode === 'nearby' ? (
         <NearbyList user={user} />
+      ) : (
+        <MustSeeList user={user} sights={sights} />
       )}
       <View
         style={{ position: 'absolute', top: insets.top + Spacing.two, left: 0, right: 0 }}
@@ -53,7 +63,15 @@ export default function ExploreScreen() {
   );
 }
 
-function PlacesMap({ position, showsUser }: { position: Position | null; showsUser: boolean }) {
+function PlacesMap({
+  position,
+  showsUser,
+  sights,
+}: {
+  position: Position | null;
+  showsUser: boolean;
+  sights: RankedSight[];
+}) {
   const mapRef = useRef<MapView>(null);
   const [bounds, setBounds] = useState<Bounds>(() => regionToBounds(WORLD_REGION));
   const userMovedMap = useRef(false);
@@ -101,6 +119,16 @@ function PlacesMap({ position, showsUser }: { position: Position | null; showsUs
             description={`${formatPhotoCount(place.photoCount)} · Tap to open`}
             pinColor={BrandColor}
             onCalloutPress={() => openPlace(place.id)}
+          />
+        ))}
+        {sights.map((sight) => (
+          <Marker
+            key={`sight-${sight.id}`}
+            coordinate={{ latitude: sight.lat, longitude: sight.lng }}
+            title={`★ ${sight.name}`}
+            description={`Must see · ${formatKm(sight.distanceKm)} · Tap for details`}
+            pinColor={SightColor}
+            onCalloutPress={() => openSight(sight.id)}
           />
         ))}
       </MapView>
@@ -198,27 +226,5 @@ function NearbyList({ user }: { user: ReturnType<typeof useUserPosition> }) {
       onRefresh={() => places.refetch()}
       refreshing={places.isRefetching}
     />
-  );
-}
-
-function EmptyMessage({
-  title,
-  body,
-  children,
-}: {
-  title: string;
-  body: string;
-  children?: ReactNode;
-}) {
-  return (
-    <View style={{ paddingTop: Spacing.five, gap: Spacing.three, alignItems: 'center' }}>
-      <ThemedText type="smallBold" style={{ fontSize: 18 }}>
-        {title}
-      </ThemedText>
-      <ThemedText themeColor="textSecondary" style={{ textAlign: 'center' }} selectable>
-        {body}
-      </ThemedText>
-      {children && <View style={{ flexDirection: 'row' }}>{children}</View>}
-    </View>
   );
 }

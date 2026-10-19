@@ -61,6 +61,7 @@ export default function RootLayout() {
             name="onboarding"
             options={{ presentation: 'fullScreenModal', headerShown: false, gestureEnabled: false }}
           />
+          <Stack.Screen name="sight/[sightId]" options={{ title: '', headerBackTitle: 'Back' }} />
           <Stack.Screen name="about" options={{ title: 'About', headerBackTitle: 'Back' }} />
           <Stack.Screen
             name="legal/[doc]"
