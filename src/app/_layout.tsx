@@ -2,6 +2,7 @@ import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client
 import { DarkTheme, DefaultTheme, router, Stack, ThemeProvider } from 'expo-router';
 import { useEffect } from 'react';
 import { useColorScheme } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { configureNotificationHandler } from '@/features/notifications/register';
 import { offerNotificationsOnce, syncPushTokenIfAllowed } from '@/features/notifications/setup';
@@ -47,30 +48,33 @@ function AppServices() {
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   return (
-    <PersistQueryClientProvider client={queryClient} persistOptions={persistOptions}>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen
-            name="capture/preview"
-            options={{ title: 'Post this photo?', headerBackTitle: 'Camera' }}
-          />
-          <Stack.Screen name="place/[placeId]" options={{ title: '', headerBackTitle: 'Back' }} />
-          <Stack.Screen name="photo/[photoId]" options={{ title: 'Photo', headerBackTitle: 'Back' }} />
-          <Stack.Screen
-            name="onboarding"
-            options={{ presentation: 'fullScreenModal', headerShown: false, gestureEnabled: false }}
-          />
-          <Stack.Screen name="sight/[sightId]" options={{ title: '', headerBackTitle: 'Back' }} />
-          <Stack.Screen name="about" options={{ title: 'About', headerBackTitle: 'Back' }} />
-          <Stack.Screen
-            name="legal/[doc]"
-            options={{ title: '', presentation: 'modal', headerBackTitle: 'Back' }}
-          />
-          <Stack.Screen name="dev/seed" options={{ title: 'Developer tools' }} />
-        </Stack>
-        <AppServices />
-      </ThemeProvider>
-    </PersistQueryClientProvider>
+    // Gesture root: needed for pinch-to-zoom on the camera and pan/pinch in the photo editor.
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <PersistQueryClientProvider client={queryClient} persistOptions={persistOptions}>
+        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+          <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen
+              name="capture/preview"
+              options={{ title: 'Post this photo?', headerBackTitle: 'Camera' }}
+            />
+            <Stack.Screen name="place/[placeId]" options={{ title: '', headerBackTitle: 'Back' }} />
+            <Stack.Screen name="photo/[photoId]" options={{ title: 'Photo', headerBackTitle: 'Back' }} />
+            <Stack.Screen
+              name="onboarding"
+              options={{ presentation: 'fullScreenModal', headerShown: false, gestureEnabled: false }}
+            />
+            <Stack.Screen name="sight/[sightId]" options={{ title: '', headerBackTitle: 'Back' }} />
+            <Stack.Screen name="about" options={{ title: 'About', headerBackTitle: 'Back' }} />
+            <Stack.Screen
+              name="legal/[doc]"
+              options={{ title: '', presentation: 'modal', headerBackTitle: 'Back' }}
+            />
+            <Stack.Screen name="dev/seed" options={{ title: 'Developer tools' }} />
+          </Stack>
+          <AppServices />
+        </ThemeProvider>
+      </PersistQueryClientProvider>
+    </GestureHandlerRootView>
   );
 }
