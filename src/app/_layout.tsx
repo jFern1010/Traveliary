@@ -58,6 +58,10 @@ export default function RootLayout() {
               name="capture/preview"
               options={{ title: 'Post this photo?', headerBackTitle: 'Camera' }}
             />
+            <Stack.Screen
+              name="capture/edit"
+              options={{ title: 'Edit', gestureEnabled: false, headerStyle: { backgroundColor: 'black' }, headerTintColor: 'white' }}
+            />
             <Stack.Screen name="place/[placeId]" options={{ title: '', headerBackTitle: 'Back' }} />
             <Stack.Screen name="photo/[photoId]" options={{ title: 'Photo', headerBackTitle: 'Back' }} />
             <Stack.Screen

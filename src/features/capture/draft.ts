@@ -1,3 +1,4 @@
+import type { EditState } from '@/features/editor/edit-state';
 import { uuidv4 } from '@/lib/uuid';
 
 import { getCaptureLocation, type CaptureLocation } from './capture-location';
@@ -16,10 +17,24 @@ export type CaptureDraft = {
   previewUri: string;
   previewAspectRatio: number;
   location: Promise<CaptureLocation>;
+  /** The capture, resized to upload size. Always the source for editing, so re-edits never degrade. */
   photo: Promise<ProcessedPhoto>;
+  /** Set when the user edited the photo; posting uses this instead of `photo`. */
+  edited: { photo: ProcessedPhoto; edits: EditState } | null;
 };
 
 let current: CaptureDraft | null = null;
+const listeners = new Set<() => void>();
+
+/** For useSyncExternalStore: the preview re-renders when an edit is applied. */
+export function subscribeDraft(listener: () => void): () => void {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
+}
+
+function emit() {
+  listeners.forEach((l) => l());
+}
 
 export function startDraft(picture: { uri: string; width: number; height: number }): CaptureDraft {
   const location = getCaptureLocation();
@@ -35,7 +50,9 @@ export function startDraft(picture: { uri: string; width: number; height: number
     previewAspectRatio: picture.width / picture.height,
     location,
     photo,
+    edited: null,
   };
+  emit();
   return current;
 }
 
@@ -45,4 +62,12 @@ export function getDraft(): CaptureDraft | null {
 
 export function clearDraft() {
   current = null;
+  emit();
+}
+
+/** Stores (or, with null, removes) the edited version of the draft with the given id. */
+export function setDraftEdit(draftId: string, edited: CaptureDraft['edited']) {
+  if (!current || current.id !== draftId) return;
+  current = { ...current, edited };
+  emit();
 }

@@ -1,7 +1,7 @@
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
-import { useState } from 'react';
-import { ActivityIndicator, Alert, ScrollView, View } from 'react-native';
+import { useState, useSyncExternalStore } from 'react';
+import { ActivityIndicator, Alert, Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Icon } from '@/components/icon';
@@ -10,14 +10,16 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { BrandColor, Spacing } from '@/constants/theme';
 import type { CaptureLocation } from '@/features/capture/capture-location';
-import { clearDraft, getDraft } from '@/features/capture/draft';
+import { clearDraft, getDraft, subscribeDraft } from '@/features/capture/draft';
 import { formatCoordinates, formatPlaceLabel } from '@/features/capture/place-name';
 import { enqueue } from '@/features/upload-queue/queue';
 import { usePromise, type PromiseState } from '@/hooks/use-promise';
 
 export default function PreviewScreen() {
-  // Read once: a new shutter press creates a new draft, which this screen should not pick up.
-  const [draft] = useState(getDraft);
+  // Follow the draft that opened this screen (edits update it); ignore any newer draft.
+  const liveDraft = useSyncExternalStore(subscribeDraft, getDraft);
+  const [draftId] = useState(() => liveDraft?.id ?? null);
+  const draft = liveDraft?.id === draftId ? liveDraft : null;
   const location = usePromise(draft?.location ?? null);
   const photo = usePromise(draft?.photo ?? null);
   const insets = useSafeAreaInsets();
@@ -37,9 +39,10 @@ export default function PreviewScreen() {
   const canPost = location.status === 'fulfilled' && photo.status === 'fulfilled' && !posting;
   const processing = location.status === 'pending' || photo.status === 'pending';
 
+  // Leave first, then clear: this screen follows the draft live and would otherwise flash empty.
   function retake() {
-    clearDraft();
     router.back();
+    clearDraft();
   }
 
   async function post() {
@@ -52,10 +55,11 @@ export default function PreviewScreen() {
         id: draft.id,
         takenAt: draft.takenAt,
         location: location.value,
-        photo: photo.value,
+        // The edited version when the user edited, else the capture.
+        photo: draft.edited?.photo ?? photo.value,
       });
-      clearDraft();
       router.navigate('/mine');
+      clearDraft();
     } catch (e) {
       setPosting(false);
       Alert.alert('Couldn’t save your photo', e instanceof Error ? e.message : String(e));
@@ -67,16 +71,44 @@ export default function PreviewScreen() {
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
         contentContainerStyle={{ padding: Spacing.three, gap: Spacing.three }}>
-        <Image
-          source={{ uri: draft.previewUri }}
-          style={{
-            width: '100%',
-            aspectRatio: draft.previewAspectRatio,
-            borderRadius: 16,
-          }}
-          contentFit="cover"
-          accessibilityLabel="Photo you just took"
-        />
+        <View>
+          <Image
+            source={{ uri: draft.edited?.photo.full.uri ?? draft.previewUri }}
+            style={{
+              width: '100%',
+              aspectRatio: draft.edited
+                ? draft.edited.photo.full.width / draft.edited.photo.full.height
+                : draft.previewAspectRatio,
+              borderRadius: 16,
+            }}
+            contentFit="cover"
+            accessibilityLabel={draft.edited ? 'Your edited photo' : 'Photo you just took'}
+          />
+          {photo.status === 'fulfilled' && !posting && (
+            <Pressable
+              onPress={() => router.push('/capture/edit')}
+              accessibilityRole="button"
+              accessibilityLabel="Edit photo"
+              style={({ pressed }) => ({
+                position: 'absolute',
+                right: Spacing.two,
+                bottom: Spacing.two,
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: Spacing.one,
+                paddingHorizontal: Spacing.three,
+                paddingVertical: Spacing.two,
+                borderRadius: 99,
+                backgroundColor: 'rgba(0, 0, 0, 0.55)',
+                opacity: pressed ? 0.7 : 1,
+              })}>
+              <Icon name="edit" color="white" size={16} />
+              <ThemedText type="smallBold" style={{ color: 'white' }}>
+                {draft.edited ? 'Edited · Edit' : 'Edit'}
+              </ThemedText>
+            </Pressable>
+          )}
+        </View>
 
         <LocationCard state={location} />
 
