@@ -172,3 +172,17 @@ Before a milestone is called done, run `npm run typecheck && npm run lint && npm
   - Directions use Apple or Google Maps URLs. Summaries come from Wikipedia's REST API.
   - The CC BY-SA credit is required wherever sight data is shown.
 - **Deploy:** `npx supabase@latest functions deploy nearby-sights --no-verify-jwt --use-api`, to **both** projects.
+
+## Camera & photo editor
+- **Camera** (`src/app/(tabs)/capture.tsx`):
+  - pinch zoom (`nextZoom` in `features/capture/camera-controls.ts`, tuned per platform: expo-camera zoom is a 0–1 fraction of an unknown max)
+  - 0.5× ultra-wide lens chip on iOS when the English lens name is found
+  - flash off/auto/on, rule-of-thirds grid
+  - No tap-to-focus: expo-camera can't focus on a point (see `docs/backlog.md`).
+- **Editor** (`src/app/capture/edit.tsx`):
+  - Optional, opened from the preview. Tabs: Crop (presets, rotate, flip; drag and pinch), Filters (8 color matrices), Adjust (4 sliders).
+  - Pure math lives in `features/editor/geometry.ts` and `features/editor/color.ts` (tested). The frame, thumbnails and export share it.
+- **Export** (`applyEdits`):
+  - expo-image-manipulator does flip → rotate → crop; Skia (`color-export.ts`) applies the color matrix off-screen; then `processPhoto`.
+  - Always from the draft's original `photo`. The result goes in `draft.edited`, and posting uses it.
+- **Skia** (`@shopify/react-native-skia`) is native: Expo Go includes it, but **APKs must be rebuilt** when it changes.

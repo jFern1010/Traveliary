@@ -18,6 +18,8 @@ The beta runs for about **2 weeks**. Please use it on your trips and walks, and 
 
 ## Please try
 - **Post a photo** where you are: Camera tab → shutter → **Post publicly**.
+- **Camera tools:** pinch to zoom, **0.5×** (on iPhones with an ultra-wide lens), flash, and the grid.
+- **Edit before posting:** on the preview tap **Edit** → crop, rotate, filters and brightness/contrast/saturation/warmth.
 - **Explore** the map and the **Nearby** list. Open places and photos.
 - **Must see** (Explore → Must see): famous places within 50 km. Open one for directions and its story. The first time in a new area it can take up to 30 seconds.
 - **Allow notifications**, so you hear when someone posts at a place you've been.
