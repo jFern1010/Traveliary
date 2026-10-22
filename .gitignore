@@ -44,3 +44,6 @@ example
 
 # Firebase service account keys are secrets (upload them to EAS instead)
 *firebase-adminsdk*.json
+
+# Private beta links (sent to testers directly, never public)
+*.private.md
