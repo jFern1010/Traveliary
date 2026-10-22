@@ -11,6 +11,14 @@
 
 ---
 
+<p align="center">
+  <img src="docs/screenshots/map.jpg" width="200" alt="Explore map with traveler places (blue) and must-see sights (orange)" />
+  <img src="docs/screenshots/must-see.jpg" width="200" alt="Must see: best-known places nearby, ranked" />
+  <img src="docs/screenshots/sight.jpg" width="200" alt="Sight details with directions and the Wikipedia summary" />
+  <img src="docs/screenshots/editor.jpg" width="200" alt="Photo editor with live filters" />
+</p>
+<p align="center"><sub>Explore map · Must see · Sight details · Photo editor</sub></p>
+
 ## What it does
 
 - **Posting:** you take a photo **in the app**, at the place you're standing. Traveliary tags it with the neighborhood or town ("Grünerløkka, Oslo", "Zermatt, Switzerland") and, once you agree, posts it publicly.
