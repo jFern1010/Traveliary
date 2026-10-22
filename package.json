@@ -68,5 +68,7 @@
       "^@/assets/(.*)$": "<rootDir>/assets/$1",
       "^@/(.*)$": "<rootDir>/src/$1"
     }
-  }
+  },
+  "license": "UNLICENSED",
+  "author": "Jonnel Fernandez"
 }
